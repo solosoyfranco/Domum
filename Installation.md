@@ -107,7 +107,6 @@ export TALOSCONFIG="Secrets/ControlPlane-configs/talosconfig"
 
 ---
 
-```
 ## **HashiCorp Vault Installation**
 
 ### **Step 1: Install Vault in an LXC Container**
@@ -116,7 +115,8 @@ export TALOSCONFIG="Secrets/ControlPlane-configs/talosconfig"
    ```bash
    apt update
    apt upgrade -y
-   apt install sudo gpg lsb-release -y
+   timedatectl set-timezone America/New_York
+   apt install sudo gpg lsb-release curl -y
 
    # Install HashiCorp keyring
    wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | tee /usr/share/keyrings/hashicorp-archive-keyring.gpg >/dev/null
@@ -128,6 +128,7 @@ export TALOSCONFIG="Secrets/ControlPlane-configs/talosconfig"
    echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
 
    apt update
+   
    apt install vault -y
    ```
 
@@ -147,17 +148,56 @@ export TALOSCONFIG="Secrets/ControlPlane-configs/talosconfig"
 
 2. Generate a private key:
    ```bash
+   cd /etc/vault.d/
    openssl genrsa -out vault-key.pem 2048
    ```
+3.  Generate a New Certificate with SANs
+    ```plaintext
+    #Create a file named vault-cert.conf:
+    nano vault-cert.conf
+    ##
+    [req]
+    default_bits       = 2048
+    prompt             = no
+    default_md         = sha256
+    distinguished_name = dn
+    req_extensions     = req_ext
 
-3. Generate a CSR:
+    [dn]
+    C  = US
+    ST = State
+    L  = City
+    O  = Organization
+    OU = Unit
+    CN = 10.0.0.8
+
+    [req_ext]
+    subjectAltName = @alt_names
+
+    [alt_names]
+    IP.1 = 10.0.0.8
+    IP.2 = 127.0.0.1
+    ```
+
+4. Generate a CSR:
    ```bash
-   openssl req -new -key vault-key.pem -out vault-csr.pem        -subj "/C=US/ST=State/L=City/O=Organization/OU=Unit/CN=10.0.0.8"
+   openssl req -new -key vault-key.pem -out vault-csr.pem -config vault-cert.conf
    ```
 
-4. Generate a self-signed certificate:
+5. Generate a self-signed certificate:
    ```bash
-   openssl x509 -req -in vault-csr.pem -signkey vault-key.pem -out vault-cert.pem -days 365
+   openssl x509 -req -in vault-csr.pem -signkey vault-key.pem -out vault-cert.pem -days 365 -extensions req_ext -extfile vault-cert.conf
+   ```
+6. Fix some CA errors: 
+    ```bash
+   cp /etc/vault.d/vault-cert.pem /root
+   echo 'VAULT_CACERT="/root/vault-cert.pem"' >> /etc/environment
+   echo 'VAULT_ADDR="https://10.0.0.8:8200"' >> /etc/environment
+   source /etc/environment
+   #Fixing the Permission Denied Error
+   chown vault:vault /etc/vault.d/vault-key.pem /etc/vault.d/vault-cert.pem
+   #only for vault users
+   chmod 640 /etc/vault.d/vault-key.pem /etc/vault.d/vault-cert.pem
    ```
 
 ---
@@ -210,7 +250,7 @@ ui = true
 ```bash
 cat <<EOF | sudo tee /etc/systemd/system/vault.service
 [Unit]
-Description="HashiCorp Vault - A tool for managing secrets"
+Description=HashiCorp Vault - Secret Management Tool
 Requires=network-online.target
 After=network-online.target
 ConditionFileNotEmpty=/etc/vault.d/vault.hcl
@@ -236,9 +276,6 @@ KillSignal=SIGINT
 Restart=on-failure
 RestartSec=5
 TimeoutStopSec=30
-StartLimitInterval=60
-StartLimitIntervalSec=60
-StartLimitBurst=3
 LimitNOFILE=65536
 LimitMEMLOCK=infinity
 
@@ -247,20 +284,49 @@ WantedBy=multi-user.target
 
 EOF
 ```
+### **Set Permissions**
+    ```bash
+    chown -R vault:vault /etc/vault.d /vault/data
+    chmod 750 /etc/vault.d/vault.hcl
+    systemctl enable vault
+    systemctl start vault
+
+    ```
+### **Optional: Use an Environment File**
+    ```bash
+    cat <<EOF | sudo tee /etc/vault.d/vault.env
+    VAULT_ADDR=https://10.0.0.8:8200
+    VAULT_CACERT=/etc/vault.d/vault-cert.pem
+    EOF
+    ```
+Update the service file:
+    ```bash
+    EnvironmentFile=/etc/vault.d/vault.env
+    systemctl daemon-reload
+    systemctl restart vault
+    ```
+
 ### **Check Status**
-```bash
-systemctl status -l vault
-* vault.service - "HashiCorp Vault - A tool for managing secrets"
-     Loaded: loaded (/lib/systemd/system/vault.service; disabled; vendor preset: enabled)
-     Active: activating (start) since Thu 2023-12-14 03:08:08 UTC; 1min 4s ago
-       Docs: https://developer.hashicorp.com/vault/docs
-   Main PID: 544 (vault)
-      Tasks: 6 (limit: 38261)
-     Memory: 22.4M
-        CPU: 108ms
-     CGroup: /system.slice/vault.service
-             `-544 /usr/bin/vault server -config=/etc/vault.d/vault.hcl
-```
+    ```bash
+    systemctl status -l vault
+    * vault.service - "HashiCorp Vault - A tool for managing secrets"
+        Loaded: loaded (/lib/systemd/system/vault.service; disabled; vendor preset: enabled)
+        Active: activating (start) since Thu 2023-12-14 03:08:08 UTC; 1min 4s ago
+        Docs: https://developer.hashicorp.com/vault/docs
+    Main PID: 544 (vault)
+        Tasks: 6 (limit: 38261)
+        Memory: 22.4M
+            CPU: 108ms
+        CGroup: /system.slice/vault.service
+                `-544 /usr/bin/vault server -config=/etc/vault.d/vault.hcl
+    ```
+### **Verify Initialization**
+    ```bash
+    vault operator init
+    #Save the unseal keys and root token securely. You’ll need them to unseal Vault.
+    #access thru web and paste the keys
+    ```
+
 ---
 ## **Optional: PiKVM with EZCOO KVM Switch 4x1**
 
@@ -398,14 +464,28 @@ Save and exit.
    kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
    ```
 
-2. Access the dashboard:
+2. Expose the Dashboard using NodePort:
    ```bash
-   kubectl proxy
+   kubectl -n kubernetes-dashboard edit service kubernetes-dashboard
+   #change
+   type: ClusterIP
+   #to
+   type: NodePort
+   #Esc + :wq
    ```
-
-3. Open in your browser:
+3. Verify
+    ```bash
+    > kubectl -n kubernetes-dashboard get service kubernetes-dashboard
+    NAME                   TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)         AGE
+    kubernetes-dashboard   NodePort   10.98.236.243   <none>        443:31701/TCP   2d16h
+    > kubectl get nodes -o wide
+    NAME                 STATUS   ROLES           AGE     VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE         KERNEL-VERSION   CONTAINER-RUNTIME
+    domum-controlplane   Ready    control-plane   3d20h   v1.32.0   10.0.0.90     <none>        Talos (v1.9.1)   6.12.6-talos     containerd://2.0.1
+    domum-worker92       Ready    <none>          3d20h   v1.32.0   10.0.0.92     <none>        Talos (v1.9.1)   6.12.6-talos     containerd://2.0.1
+    ```
+4. Open in your browser:
    ```
-   http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
+   https://10.0.0.90:31701
    ```
 
 ---
