@@ -608,6 +608,20 @@ kubectl get nodes
 - Avoid exposing the dashboard externally without secure access control.
 
 --- 
+# Install and Configure Flux CD
+## **Install the Flux CLI on your local machine:**
+    ```bash
+        brew install fluxcd/tap/flux
+    ```
+### **Bootstrap Flux CD**
+Bootstrap Flux on your cluster and connect it to your GitHub repository:
+    ```bash
+    flux bootstrap github \
+  --owner=yourusername \
+  --repository=yourrepository \
+  --branch=main \
+  --path=clusters/home \
+  --personal
 
 ---
 

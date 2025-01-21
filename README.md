@@ -34,8 +34,18 @@ Domum is a GitOps-driven homelab designed to integrate GitHub with a self-hosted
      ```bash
      brew install siderolabs/tap/talosctl
      ```
+2. **Install `k9s`**
+  - On MacOs, run: 
+    ```bash
+    brew install derailed/k9s/k9s
+    ```
+3. **Install Flux CLI**
+   - On MacOS, run:
+  ```bash
+  brew install fluxcd/tap/flux
+  ```
 
-2. **Download Talos Linux**
+4. **Download Talos Linux**
    - For Proxmox, download the latest Talos release (e.g., `MetalAMD64.iso`) from [Talos Releases](https://github.com/siderolabs/talos/releases/tag/v1.9.1).
 
 ### Installation Notes
