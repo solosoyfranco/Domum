@@ -457,36 +457,157 @@ Save and exit.
 
 ---
 
-## **Kubernetes Dashboard Installation**
+# Kubernetes Dashboard Setup and Access
 
-1. Apply the Kubernetes dashboard YAML:
+## **1. Apply the Kubernetes Dashboard YAML**
+Apply the recommended YAML file to deploy the Kubernetes Dashboard:
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+```
+
+---
+
+## **2. Expose the Dashboard Using NodePort**
+Expose the dashboard service to allow direct access:
+```bash
+kubectl -n kubernetes-dashboard edit service kubernetes-dashboard
+```
+In the editor:
+- Change:
+  ```yaml
+  type: ClusterIP
+  ```
+- To:
+  ```yaml
+  type: NodePort
+  ```
+Save and exit (in `vim`: `Esc + :wq`).
+
+---
+
+## **3. Verify the Service**
+Check the exposed service and node details:
+```bash
+kubectl -n kubernetes-dashboard get service kubernetes-dashboard
+```
+Sample output:
+```
+NAME                   TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)         AGE
+kubernetes-dashboard   NodePort   10.98.236.243   <none>        443:31701/TCP   2d16h
+```
+
+Get node information:
+```bash
+kubectl get nodes -o wide
+```
+Sample output:
+```
+NAME                 STATUS   ROLES           AGE     VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE         KERNEL-VERSION   CONTAINER-RUNTIME
+domum-controlplane   Ready    control-plane   3d20h   v1.32.0   10.0.0.90     <none>        Talos (v1.9.1)   6.12.6-talos     containerd://2.0.1
+domum-worker92       Ready    <none>          3d20h   v1.32.0   10.0.0.92     <none>        Talos (v1.9.1)   6.12.6-talos     containerd://2.0.1
+```
+
+---
+
+## **4. Open the Dashboard in Your Browser**
+Access the dashboard using your browser:
+```
+https://10.0.0.90:31701
+```
+
+---
+
+## **5. Generate Access Credentials**
+
+### **5.1 Create a ServiceAccount**
+Create a ServiceAccount in the `kubernetes-dashboard` namespace:
+```bash
+kubectl create serviceaccount dashboard-user -n kubernetes-dashboard
+```
+
+### **5.2 Assign Permissions**
+#### Grant Full Access (not recommended for production):
+```bash
+kubectl create clusterrolebinding dashboard-user-binding \
+  --clusterrole=cluster-admin \
+  --serviceaccount=kubernetes-dashboard:dashboard-user
+```
+
+#### Alternatively, for Limited Access:
+Bind the `view` role to the ServiceAccount for read-only access:
+```bash
+kubectl create rolebinding dashboard-view-only \
+  --clusterrole=view \
+  --serviceaccount=kubernetes-dashboard:dashboard-user \
+  -n kubernetes-dashboard
+```
+
+---
+
+### **5.3 Generate a Token**
+Retrieve the token to access the dashboard:
+```bash
+kubectl create token dashboard-user -n kubernetes-dashboard
+```
+
+---
+
+### **5.4 Create a kubeconfig for Dashboard Access**
+#### Create and Edit a kubeconfig File:
+1. Create the file:
    ```bash
-   kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+   nano Secrets/dashboard-kubeconfig.yaml
    ```
 
-2. Expose the Dashboard using NodePort:
-   ```bash
-   kubectl -n kubernetes-dashboard edit service kubernetes-dashboard
-   #change
-   type: ClusterIP
-   #to
-   type: NodePort
-   #Esc + :wq
+2. Add the following content (replace placeholders with actual values):
+   ```yaml
+   apiVersion: v1
+   kind: Config
+   clusters:
+   - cluster:
+       server: https://10.0.0.90:6443
+       certificate-authority-data: <base64-ca-certificate>
+     name: domum-cluster
+   contexts:
+   - context:
+       cluster: domum-cluster
+       user: dashboard-user
+     name: dashboard-context
+   current-context: dashboard-context
+   users:
+   - name: dashboard-user
+     user:
+       token: <token>
    ```
-3. Verify
-    ```bash
-    > kubectl -n kubernetes-dashboard get service kubernetes-dashboard
-    NAME                   TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)         AGE
-    kubernetes-dashboard   NodePort   10.98.236.243   <none>        443:31701/TCP   2d16h
-    > kubectl get nodes -o wide
-    NAME                 STATUS   ROLES           AGE     VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE         KERNEL-VERSION   CONTAINER-RUNTIME
-    domum-controlplane   Ready    control-plane   3d20h   v1.32.0   10.0.0.90     <none>        Talos (v1.9.1)   6.12.6-talos     containerd://2.0.1
-    domum-worker92       Ready    <none>          3d20h   v1.32.0   10.0.0.92     <none>        Talos (v1.9.1)   6.12.6-talos     containerd://2.0.1
-    ```
-4. Open in your browser:
-   ```
-   https://10.0.0.90:31701
-   ```
+
+#### Retrieve the Certificate Authority:
+Get the base64-encoded CA certificate:
+```bash
+kubectl config view --raw -o jsonpath="{.clusters[0].cluster.certificate-authority-data}"
+```
+Replace `<base64-ca-certificate>` in the file with the output.
+
+#### Save and Test the kubeconfig:
+Save the file and test access:
+```bash
+export KUBECONFIG=$(pwd)/Secrets/dashboard-kubeconfig.yaml
+kubectl get nodes
+```
+
+---
+
+### **6. Access the Dashboard**
+- **Using the Token**: Paste the token in the login page.
+- **Using the kubeconfig**: Upload the `dashboard-kubeconfig.yaml` file.
+
+---
+
+### **Best Practices**
+- Use the `view` role for limited access in production environments.
+- Rotate tokens regularly and manage secrets securely.
+- Avoid exposing the dashboard externally without secure access control.
+
+--- 
 
 ---
 
