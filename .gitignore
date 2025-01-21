@@ -4,3 +4,10 @@ Secrets/ControlPane-configs/worker.yaml
 Secrets/ControlPane-configs/talosconfig
 env39/
 *.kubeconfig
+*.pem
+*.key
+*.crt
+*.csr
+*.DS_Store
+
+
