@@ -1,13 +1,97 @@
+# Ignore Secrets directory to protect sensitive configuration files
 Secrets/
+Secrets/ControlPane-configs/
 Secrets/ControlPane-configs/controlplane.yaml
 Secrets/ControlPane-configs/worker.yaml
 Secrets/ControlPane-configs/talosconfig
-env39/
+
+# Ignore Kubernetes configuration files
 *.kubeconfig
+kubeconfig
+
+# Ignore SSL/TLS certificates and keys
 *.pem
 *.key
 *.crt
 *.csr
+
+# Ignore macOS system files
 *.DS_Store
 
+# Ignore virtual environment directories
+env/
+env39/
 
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Ignore log files
+*.log
+
+# Ignore IDE/project files
+.vscode/
+.idea/
+*.iml
+
+# Ignore build artifacts and temporary files
+build/
+dist/
+*.tmp
+*.swp
+*.swo
+*.bak
+
+# Ignore Kubernetes files
+.kube/
+.kube/config
+
+# Ignore package managers and dependencies
+node_modules/
+*.lock
+Pipfile
+Pipfile.lock
+poetry.lock
+*.egg-info/
+
+# Ignore backup files
+*.bak
+*.old
+*.orig
+*.save
+
+# Ignore Terraform files (if using for infrastructure)
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+
+# Ignore Docker-related files
+.dockerignore
+docker-compose.override.yml
+.docker/
+
+# Ignore debugging and runtime files
+*.out
+*.pid
+*.dump
+
+# Ignore CI/CD-related files
+coverage/
+.coverage
+.nyc_output/
+
+# Ignore system-level temporary files
+*.tmp
+*.temp
+*.swp
+
+# Ignore custom scripts or sensitive files
+scripts/*.sh
+*.env
+.env.*
+.envrc
+
+# Ignore application-specific files
+*.yaml~
+*.json~
