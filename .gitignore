@@ -2,3 +2,5 @@ Secrets/
 Secrets/ControlPane-configs/controlplane.yaml
 Secrets/ControlPane-configs/worker.yaml
 Secrets/ControlPane-configs/talosconfig
+env39/
+*.kubeconfig
