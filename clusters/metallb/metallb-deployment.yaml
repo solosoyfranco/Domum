@@ -32,12 +32,13 @@ spec:
                   fieldPath: metadata.namespace
           securityContext:
             allowPrivilegeEscalation: false
-            runAsNonRoot: true
             capabilities:
               drop: ["ALL"]
             seccompProfile:
               type: RuntimeDefault
+
 ---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -72,7 +73,6 @@ spec:
                   fieldPath: spec.nodeName
           securityContext:
             allowPrivilegeEscalation: false
-            runAsNonRoot: true
             capabilities:
               drop: ["ALL"]
             seccompProfile:
