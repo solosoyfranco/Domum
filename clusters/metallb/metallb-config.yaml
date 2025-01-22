@@ -1,13 +1,19 @@
 #cluster/metallb/metallb-config.yaml
-apiVersion: v1
-kind: ConfigMap
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
 metadata:
-  name: metallb-config
+  name: my-l2-pool
   namespace: metallb-system
-data:
-  config: |
-    address-pools:
-    - name: default
-      protocol: layer2
-      addresses:
-      - 10.0.0.101-10.0.0.199
+spec:
+  addresses:
+  - 10.0.0.101-10.0.0.199  # EDIT to match an unused block on your LAN
+
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: my-l2-advert
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+  - my-l2-pool
