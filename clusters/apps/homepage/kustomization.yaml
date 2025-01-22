@@ -4,6 +4,3 @@ resources:
   - homepage/deployment.yaml
   - homepage/service.yaml
   - homepage/ingress.yaml
-  - ./metallb/metallb.yaml
-  - ./apps/homepage/homepage.yaml
-  - ./ingress/ingress.yaml
