@@ -1,5 +1,4 @@
-# cluster/metallb/metallb-deployment.yaml
-
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -18,27 +17,40 @@ spec:
         component: controller
     spec:
       serviceAccountName: controller
-      tolerations:
-        - key: "node-role.kubernetes.io/control-plane"
-          operator: "Exists"
-          effect: "NoSchedule"
       containers:
         - name: controller
           image: quay.io/metallb/controller:v0.14.9
+          args:
+            - --port=7472
+            - --webhook-port=9443
+            - --webhook-cert-dir=/certs
+            - --log-level=info
           env:
             - name: METALLB_NAMESPACE
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+          volumeMounts:
+            - name: webhook-certs
+              mountPath: /certs
+              readOnly: true
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
             seccompProfile:
               type: RuntimeDefault
+      volumes:
+        - name: webhook-certs
+          secret:
+            secretName: metallb-webhook-cert
+            items:
+              - key: certificate
+                path: tls.crt
+              - key: privatekey
+                path: tls.key
 
 ---
-
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -56,10 +68,6 @@ spec:
         component: speaker
     spec:
       serviceAccountName: speaker
-      tolerations:
-        - key: "node-role.kubernetes.io/control-plane"
-          operator: "Exists"
-          effect: "NoSchedule"
       containers:
         - name: speaker
           image: quay.io/metallb/speaker:v0.14.9
