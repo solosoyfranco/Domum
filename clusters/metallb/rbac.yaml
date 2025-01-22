@@ -1,4 +1,5 @@
-#clusters/metallb/rbac.yaml
+# clusters/metallb/rbac.yaml
+
 # ServiceAccount for MetalLB Controller
 apiVersion: v1
 kind: ServiceAccount
@@ -27,7 +28,7 @@ rules:
     verbs: ["get", "list", "watch"]
 
 ---
-# RoleBinding for MetalLB Controller
+# RoleBinding for MetalLB Controller and Speaker
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -41,6 +42,35 @@ subjects:
   - kind: ServiceAccount
     name: controller
     namespace: metallb-system
+  - kind: ServiceAccount
+    name: speaker
+    namespace: metallb-system
+
+---
+# ClusterRole for MetalLB Speaker to manage nodes (Layer2 protocol)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: metallb-speaker
+rules:
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "list", "watch", "update"]
+
+---
+# ClusterRoleBinding for MetalLB Speaker
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: metallb-speaker
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: metallb-speaker
+subjects:
   - kind: ServiceAccount
     name: speaker
     namespace: metallb-system
