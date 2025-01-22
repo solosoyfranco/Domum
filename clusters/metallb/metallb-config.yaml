@@ -6,7 +6,7 @@ metadata:
   namespace: metallb-system
 spec:
   addresses:
-  - 10.0.0.101-10.0.0.199  # EDIT to match an unused block on your LAN
+  - 10.0.0.101-10.0.0.199
 
 ---
 apiVersion: metallb.io/v1beta1
