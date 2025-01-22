@@ -40,12 +40,11 @@ spec:
 ---
 
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
   namespace: metallb-system
   name: speaker
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: metallb
