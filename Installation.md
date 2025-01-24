@@ -18,22 +18,26 @@ Setup using **Proxmox** as the primary control plane and **Raspberry Pi 5** as t
 
 ### **From the Terminal**
 1. **Generate Talos Configuration:**
+   
    ```bash
    talosctl gen config Domum-ControlPlane https://10.0.0.90:6443 -o Secrets/ControlPlane-configs
    ```
 
 2. **Apply Configuration to the Control Plane VM:**
+   
    ```bash
    talosctl apply-config -e 10.0.0.90 -n 10.0.0.90 --insecure -f Secrets/ControlPlane-configs/controlplane.yaml
    talosctl apply-config -n 10.0.0.90 -f Secrets/ControlPlane-configs/controlplane.yaml
    ```
 
 3. **Apply Configuration to the Worker VM:**
+   
    ```bash
    talosctl apply-config -e 10.0.0.92 -n 10.0.0.92 --insecure -f Secrets/ControlPlane-configs/worker.yaml
    ```
 
 4. **Additional Talos Commands:**
+   
    ```bash
    talosctl config endpoint 10.0.0.90
    talosctl config nodes 10.0.0.90
@@ -80,30 +84,30 @@ Setup using **Proxmox** as the primary control plane and **Raspberry Pi 5** as t
 ## **Managing Secrets**
 
 ### **Step 1: Add a `.gitignore` File**
-Create or edit the `.gitignore` file:
-```bash
-nano .gitignore
-```
+    Create or edit the `.gitignore` file:
+    ```bash
+    nano .gitignore
+    ```
 
-Add the following lines:
-```plaintext
-# Ignore Talos configuration files
-Secrets/
-Secrets/ControlPlane-configs/controlplane.yaml
-Secrets/ControlPlane-configs/worker.yaml
-Secrets/ControlPlane-configs/talosconfig
-```
+    Add the following lines:
+    ```plaintext
+    # Ignore Talos configuration files
+    Secrets/
+    Secrets/ControlPlane-configs/controlplane.yaml
+    Secrets/ControlPlane-configs/worker.yaml
+    Secrets/ControlPlane-configs/talosconfig
+    ```
 
 ### **Step 2: Prevent Accidental Upload of Existing Files**
-Untrack sensitive files:
-```bash
-git rm --cached Secrets/ControlPane-configs/controlplane.yaml
-```
+    Untrack sensitive files:
+    ```bash
+    git rm --cached Secrets/ControlPane-configs/controlplane.yaml
+    ```
 
 ### **Step 3: Export Talos Environment Variable**
-```bash
-export TALOSCONFIG="Secrets/ControlPlane-configs/talosconfig"
-```
+    ```bash
+    export TALOSCONFIG="Secrets/ControlPlane-configs/talosconfig"
+    ```
 
 ---
 
@@ -203,26 +207,26 @@ export TALOSCONFIG="Secrets/ControlPlane-configs/talosconfig"
 ---
 
 ### **Step 3: Configure Vault**
-Edit `/etc/vault.d/vault.hcl`:
-```hcl
-# Storage backend
-storage "file" {
-  path = "/vault/data"
-}
+    Edit `/etc/vault.d/vault.hcl`:
+    ```hcl
+    # Storage backend
+    storage "file" {
+    path = "/vault/data"
+    }
 
-# Listener configuration (HTTPS)
-listener "tcp" {
-  address     = "0.0.0.0:8200"
-  tls_cert_file = "/etc/vault.d/vault-cert.pem"
-  tls_key_file  = "/etc/vault.d/vault-key.pem"
-}
+    # Listener configuration (HTTPS)
+    listener "tcp" {
+    address     = "0.0.0.0:8200"
+    tls_cert_file = "/etc/vault.d/vault-cert.pem"
+    tls_key_file  = "/etc/vault.d/vault-key.pem"
+    }
 
-# API address
-api_addr = "https://10.0.0.8:8200"
+    # API address
+    api_addr = "https://10.0.0.8:8200"
 
-# UI
-ui = true
-```
+    # UI
+    ui = true
+    ```
 
 ---
 
@@ -340,14 +344,14 @@ Update the service file:
    ```
 
 ### **Step 2: Install Tailscale**
-```bash
-rw
-pacman -Syu tailscale-pikvm
-reboot now
-# After reboot
-tailscale up
-systemctl enable --now tailscale
-```
+    ```bash
+    rw
+    pacman -Syu tailscale-pikvm
+    reboot now
+    # After reboot
+    tailscale up
+    systemctl enable --now tailscale
+    ```
 
 ### **Step 3: Configure GPIO and HID**
 Edit `/etc/kvmd/override.yaml` to configure GPIO for the EZCOO KVM switch.
@@ -447,12 +451,12 @@ Edit `/etc/kvmd/override.yaml` to configure GPIO for the EZCOO KVM switch.
 
 
 ### **Step 5: Improve Mouse Latency (Optional):**
-```bash
-nano /boot/cmdline.txt
-#Add the Following:
-##usbhid.mousepoll=0
-```
-Save and exit.
+    ```bash
+    nano /boot/cmdline.txt
+    #Add the Following:
+    ##usbhid.mousepoll=0
+    ```
+    Save and exit.
 
 
 ---
@@ -460,95 +464,95 @@ Save and exit.
 # Kubernetes Dashboard Setup and Access
 
 ## **1. Apply the Kubernetes Dashboard YAML**
-Apply the recommended YAML file to deploy the Kubernetes Dashboard:
-```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
-```
+    Apply the recommended YAML file to deploy the Kubernetes Dashboard:
+    ```bash
+    kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+    ```
 
 ---
 
-## **2. Expose the Dashboard Using NodePort**
+## **2. Expose the Dashboard Using NodePort - (optional) moving this to Loadbalancer for MetalLB**
 Expose the dashboard service to allow direct access:
-```bash
-kubectl -n kubernetes-dashboard edit service kubernetes-dashboard
-```
-In the editor:
-- Change:
-  ```yaml
-  type: ClusterIP
-  ```
-- To:
-  ```yaml
-  type: NodePort
-  ```
+    ```bash
+    kubectl -n kubernetes-dashboard edit service kubernetes-dashboard
+    ```
+    In the editor:
+    - Change:
+    ```yaml
+    type: ClusterIP
+    ```
+    - To:
+    ```yaml
+    type: NodePort
+    ```
 Save and exit (in `vim`: `Esc + :wq`).
 
 ---
 
 ## **3. Verify the Service**
-Check the exposed service and node details:
-```bash
-kubectl -n kubernetes-dashboard get service kubernetes-dashboard
-```
-Sample output:
-```
-NAME                   TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)         AGE
-kubernetes-dashboard   NodePort   10.98.236.243   <none>        443:31701/TCP   2d16h
-```
+    Check the exposed service and node details:
+    ```bash
+    kubectl -n kubernetes-dashboard get service kubernetes-dashboard
+    ```
+    Sample output:
+    ```
+    NAME                   TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)         AGE
+    kubernetes-dashboard   NodePort   10.98.236.243   <none>        443:31701/TCP   2d16h
+    ```
 
-Get node information:
-```bash
-kubectl get nodes -o wide
-```
-Sample output:
-```
-NAME                 STATUS   ROLES           AGE     VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE         KERNEL-VERSION   CONTAINER-RUNTIME
-domum-controlplane   Ready    control-plane   3d20h   v1.32.0   10.0.0.90     <none>        Talos (v1.9.1)   6.12.6-talos     containerd://2.0.1
-domum-worker92       Ready    <none>          3d20h   v1.32.0   10.0.0.92     <none>        Talos (v1.9.1)   6.12.6-talos     containerd://2.0.1
-```
+    Get node information:
+    ```bash
+    kubectl get nodes -o wide
+    ```
+    Sample output:
+    ```
+    NAME                 STATUS   ROLES           AGE     VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE         KERNEL-VERSION   CONTAINER-RUNTIME
+    domum-controlplane   Ready    control-plane   3d20h   v1.32.0   10.0.0.90     <none>        Talos (v1.9.1)   6.12.6-talos     containerd://2.0.1
+    domum-worker92       Ready    <none>          3d20h   v1.32.0   10.0.0.92     <none>        Talos (v1.9.1)   6.12.6-talos     containerd://2.0.1
+    ```
 
 ---
 
 ## **4. Open the Dashboard in Your Browser**
-Access the dashboard using your browser:
-```
-https://10.0.0.90:31701
-```
+    Access the dashboard using your browser:
+    ```
+    https://10.0.0.90:31701
+    ```
 
 ---
 
 ## **5. Generate Access Credentials**
 
 ### **5.1 Create a ServiceAccount**
-Create a ServiceAccount in the `kubernetes-dashboard` namespace:
-```bash
-kubectl create serviceaccount dashboard-user -n kubernetes-dashboard
-```
+    Create a ServiceAccount in the `kubernetes-dashboard` namespace:
+    ```bash
+    kubectl create serviceaccount dashboard-user -n kubernetes-dashboard
+    ```
 
 ### **5.2 Assign Permissions**
 #### Grant Full Access (not recommended for production):
-```bash
-kubectl create clusterrolebinding dashboard-user-binding \
-  --clusterrole=cluster-admin \
-  --serviceaccount=kubernetes-dashboard:dashboard-user
-```
+    ```bash
+    kubectl create clusterrolebinding dashboard-user-binding \
+    --clusterrole=cluster-admin \
+    --serviceaccount=kubernetes-dashboard:dashboard-user
+    ```
 
 #### Alternatively, for Limited Access:
-Bind the `view` role to the ServiceAccount for read-only access:
-```bash
-kubectl create rolebinding dashboard-view-only \
-  --clusterrole=view \
-  --serviceaccount=kubernetes-dashboard:dashboard-user \
-  -n kubernetes-dashboard
-```
+    Bind the `view` role to the ServiceAccount for read-only access:
+    ```bash
+    kubectl create rolebinding dashboard-view-only \
+    --clusterrole=view \
+    --serviceaccount=kubernetes-dashboard:dashboard-user \
+    -n kubernetes-dashboard
+    ```
 
 ---
 
 ### **5.3 Generate a Token**
-Retrieve the token to access the dashboard:
-```bash
-kubectl create token dashboard-user -n kubernetes-dashboard
-```
+    Retrieve the token to access the dashboard:
+    ```bash
+    kubectl create token dashboard-user -n kubernetes-dashboard
+    ```
 
 ---
 
@@ -581,18 +585,18 @@ kubectl create token dashboard-user -n kubernetes-dashboard
    ```
 
 #### Retrieve the Certificate Authority:
-Get the base64-encoded CA certificate:
-```bash
-kubectl config view --raw -o jsonpath="{.clusters[0].cluster.certificate-authority-data}"
-```
-Replace `<base64-ca-certificate>` in the file with the output.
+    Get the base64-encoded CA certificate:
+    ```bash
+    kubectl config view --raw -o jsonpath="{.clusters[0].cluster.certificate-authority-data}"
+    ```
+    Replace `<base64-ca-certificate>` in the file with the output.
 
-#### Save and Test the kubeconfig:
-Save the file and test access:
-```bash
-export KUBECONFIG=$(pwd)/Secrets/dashboard-kubeconfig.yaml
-kubectl get nodes
-```
+    #### Save and Test the kubeconfig:
+    Save the file and test access:
+    ```bash
+    export KUBECONFIG=$(pwd)/Secrets/dashboard-kubeconfig.yaml
+    kubectl get nodes
+    ```
 
 ---
 
@@ -609,19 +613,161 @@ kubectl get nodes
 
 --- 
 # Install and Configure Flux CD
-## **Install the Flux CLI on your local machine:**
+### **Useful Flux Commands**
+
     ```bash
-        brew install fluxcd/tap/flux
+    # Suspend Flux reconciliation
+    flux suspend kustomization flux-system
+
+    # Get the status of Flux kustomizations
+    flux get kustomizations
+
+    # Resume Flux reconciliation
+    flux resume kustomization flux-system
     ```
-### **Bootstrap Flux CD**
-Bootstrap Flux on your cluster and connect it to your GitHub repository:
-    ```bash
-    flux bootstrap github \
-  --owner=yourusername \
-  --repository=yourrepository \
-  --branch=main \
-  --path=clusters/home \
-  --personal
 
 ---
+
+## **Setup Hashicorp Vault**
+
+After installing the Vault CLI, follow these steps to set up Vault and store your secrets:
+
+### **1. Generate TLS Keys**
+
+In your secrets folder, generate the required keys:
+
+    ```bash
+    openssl req -newkey rsa:2048 -nodes -keyout tls.key -x509 -days 365 -out tls.crt
+    ```
+
+### **2. Store Keys in Vault**
+
+Add the keys to Vault:
+
+    ```bash
+    vault kv put secret/metallb-webhook-cert certificate=@tls.crt key=@tls.key
+    ```
+
+### **3. Vault Token Configuration**
+
+Set your root token for Vault:
+
+    ```bash
+    export VAULT_TOKEN={root token}
+    ```
+
+### **4. Useful Vault Commands**
+
+    ```bash
+    # Lookup token information
+    vault token lookup
+
+    # List all enabled secrets engines
+    vault secrets list
+
+    # Enable KV secrets engine at the 'secret/' path
+    vault secrets enable -path=secret kv
+
+    # Write a new policy for MetalLB
+    vault policy write metallb-policy clusters/policy/metallb-policy.hcl
+
+    # Create a new token tied to the MetalLB policy
+    vault token create -policy=metallb-policy
+
+    # List all secrets in the 'secret/' path
+    vault kv list secret/
+    ```
+
+### **5. Test the Policy Token**
+
+Use the new policy token to test access:
+
+    ```bash
+    export VAULT_TOKEN={policy token}
+    vault token lookup
+    vault kv get secret/metallb-webhook-cert
+    ```
+
+---
+
+## **Install the External Secrets **
+Add the Helm repository and install External Secrets:
+```bash
+helm repo add external-secrets https://external-secrets.github.io/external-secrets
+helm repo update
+helm install external-secrets external-secrets/external-secrets \
+  -n external-secrets \
+  --create-namespace
+``` 
+##  **Configure HashiCorp Vault for Kubernetes Integration**
+Enable Kubernetes authentication in Vault:
+```bash
+vault auth enable kubernetes
+``` 
+
+
+## **Process Overview for Securely Managing Secrets**
+1. Step 1: Add your secrets to Hashicorp Vault with root:
+    ```bash
+    #export VAULT_TOKEN={root token}
+    vault kv put secret/my-app username=admin password=supersecurepassword
+    #test
+    vault kv get -format=json secret/my-app | jq -r '.data' > Secrets/Vault/my-app-secrets.json
+    #check the file and should be correct
+    ``` 
+2. Step 2: Retrieve Secrets from Vault
+    To retrieve secrets programmatically, you use Vault’s CLI or API.
+    ```bash
+    vault kv get -format=json secret/my-app | jq -r '.data'
+    ``` 
+3. Step 3: Retrieve the CA Certificate on Talos
+    ```bash
+    #Retrieve the Kubernetes CA Certificate
+    talosctl read /etc/kubernetes/pki/ca.crt > Secrets/Kube/ca.crt
+    #Verify the Certificate
+    openssl x509 -in Secrets/Kube/ca.crt -text -noout
+    #Configure Vault with the Kubernetes API server and CA certificate:
+    cd Secrets/Kube
+    vault write auth/kubernetes/config \
+    kubernetes_host="https://10.0.0.90:6443" \
+    kubernetes_ca_cert=@ca.crt
+    #> Success! Data written to: auth/kubernetes/config
+    #check status
+    curl --cacert ca.crt https://10.0.0.90:6443
+    #if is unauthorized
+    ``` 
+4. Step 4: Create a Kubernetes Service Account:
+    ```bash
+    kubectl create serviceaccount vault-reviewer -n kube-system
+    #Bind the system:auth-delegator role to the Service Account:
+    kubectl create clusterrolebinding vault-reviewer-binding \
+    --clusterrole=system:auth-delegator \
+    --serviceaccount=kube-system:vault-reviewer
+    #retrieve the Service Acount token:
+    kubectl create token vault-reviewer -n kube-system
+    #Use the Generated Token in Vault Configuration
+    cd Secrets/Kube
+    vault write auth/kubernetes/config \
+    kubernetes_host="https://10.0.0.90:6443" \
+    kubernetes_ca_cert=@ca.crt \
+    token_reviewer_jwt="eyJhbGciOi...."
+
+    #Verify Configuration in Vault
+    vault read auth/kubernetes/config
+    #
+    ``` 
+### inprogress....
+
+---
+
+## **Install MetalLB**
+
+Follow the official MetalLB installation guide: [MetalLB Documentation](https://metallb.universe.tf/installation/)
+
+Add the MetalLB Helm repository and install it:
+
+    ```bash
+    helm repo add metallb https://metallb.github.io/metallb
+    helm install metallb metallb/metallb
+    ```
 

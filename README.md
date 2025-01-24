@@ -50,9 +50,14 @@ Domum is a GitOps-driven homelab designed to integrate GitHub with a self-hosted
     brew tap hashicorp/tap
     brew install hashicorp/tap/vault
   ```
+5. **Install Vault CLI**
+   - On MacOS, run:
+  ```bash
+  brew install kubeseal
+  ``` 
 
 
-5. **Download Talos Linux**
+6. **Download Talos Linux**
    - For Proxmox, download the latest Talos release (e.g., `MetalAMD64.iso`) from [Talos Releases](https://github.com/siderolabs/talos/releases/tag/v1.9.1).
 
 ### Installation Notes
