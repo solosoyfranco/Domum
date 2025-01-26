@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - apps/vault
   - helm-repos/hashicorp.yaml 
+  - infra
