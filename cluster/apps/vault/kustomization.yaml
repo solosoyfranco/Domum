@@ -1,0 +1,15 @@
+#Domum/cluster/apps/vault/kustomization.yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: vault-kustomization
+  namespace: flux-system
+spec:
+  interval: 5m
+  path: ./vault
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: domum-repo
+    namespace: flux-system
+  dependsOn: []
