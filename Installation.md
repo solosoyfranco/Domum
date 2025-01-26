@@ -15,7 +15,7 @@ Setup using **Proxmox** with Talos VM's and **Raspberry Pi's**, Kubernetes clust
 ---
 
 ## Talos Configuration
-
+Running a “vanilla” Kubernetes distribution, where Talos handles the OS and Kubernetes lifecycle.
 ### **From the Terminal**
 1. **Generate Talos Configuration:**
    
