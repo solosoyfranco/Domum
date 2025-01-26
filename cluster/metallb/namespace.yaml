@@ -1,4 +1,4 @@
-#cluster/metallb/namespace.yaml
+#Domum/cluster/metallb/namespace.yaml
 apiVersion: v1
 kind: Namespace
 metadata:
