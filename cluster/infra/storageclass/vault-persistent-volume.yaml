@@ -1,0 +1,14 @@
+#Domum/cluster/infra/storageclass/vault-persistent-volume.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-vault
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  hostPath:
+    path: /data/vault

@@ -18,6 +18,8 @@ spec:
   install:
     createNamespace: true
   values:
+    ui:
+      enabled: true 
     server:
       affinity: {}
       ha:
@@ -38,4 +40,3 @@ spec:
 
       # Service type. NodePort or LoadBalancer for external access if you prefer.
       serviceType: "ClusterIP"
-      
