@@ -121,9 +121,11 @@ For a simple, production-like setup, I'm using Vault’s Raft integrated storage
     helm repo update    
     ```
 
-### **2. Create a HelmRelease (Flux) for Vault**
+### **2. Create a namespace for Vault**
 
-File in:Domum/clusters/vault/vault-helmrelease.yaml
+   ```bash
+   kubectl create namespace vault
+   ``` 
 ............
 
 ---

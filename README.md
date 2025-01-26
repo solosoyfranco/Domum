@@ -41,20 +41,20 @@ Domum is a GitOps-driven homelab designed to integrate GitHub with a self-hosted
     ```
 3. **Install Flux CLI**
    - On MacOS, run:
-  ```bash
+    ```bash
     brew install fluxcd/tap/flux
     ```
 4. **Install Vault CLI**
    - On MacOS, run:
-  ```bash
+    ```bash
     brew tap hashicorp/tap
     brew install hashicorp/tap/vault
-  ```
+    ```
 5. **Install Vault CLI**
    - On MacOS, run:
-  ```bash
-  brew install kubeseal
-  ``` 
+    ```bash
+    brew install kubeseal
+    ``` 
 
 
 6. **Download Talos Linux**
