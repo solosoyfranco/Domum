@@ -1,4 +1,4 @@
-# clusters/metallb/rbac.yaml
+# Domum/cluster/metallb/rbac.yaml
 # ServiceAccount for MetalLB Controller
 apiVersion: v1
 kind: ServiceAccount
