@@ -5,3 +5,4 @@ resources:
   - apps/vault
   - helm-repos/hashicorp.yaml 
   - infra/kustomization-flux.yaml
+  - infra/namespaces/vault.yaml
