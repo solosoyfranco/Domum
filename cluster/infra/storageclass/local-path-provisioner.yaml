@@ -1,97 +1,9 @@
 #Domum/cluster/infra/storageclass/local-path-provisioner.yaml
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: local-path-storage
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: local-path-provisioner
-  namespace: local-path-storage
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: local-path-provisioner
-  template:
-    metadata:
-      labels:
-        app: local-path-provisioner
-    spec:
-      serviceAccountName: local-path-provisioner-service-account
-      containers:
-      - name: local-path-provisioner
-        image: rancher/local-path-provisioner:v0.9.1
-        volumeMounts:
-        - name: config
-          mountPath: /etc/config/
-        - name: provisioner
-          mountPath: /opt/local-path-provisioner
-      volumes:
-      - name: config
-        configMap:
-          name: local-path-config
-      - name: provisioner
-        hostPath:
-          path: /opt/local-path-provisioner
-          type: DirectoryOrCreate
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: local-path-provisioner-service-account
-  namespace: local-path-storage
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: local-path-provisioner-role
-rules:
-  - apiGroups: [""]
-    resources: ["nodes", "persistentvolumeclaims", "persistentvolumes"]
-    verbs: ["get", "list", "watch", "update", "create", "delete", "patch"]
-  - apiGroups: [""]
-    resources: ["events"]
-    verbs: ["create", "patch"]
-  - apiGroups: ["storage.k8s.io"]
-    resources: ["storageclasses"]
-    verbs: ["get", "list", "watch", "patch"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: local-path-provisioner-bind
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: local-path-provisioner-role
-subjects:
-  - kind: ServiceAccount
-    name: local-path-provisioner-service-account
-    namespace: local-path-storage
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: local-path-config
-  namespace: local-path-storage
-data:
-  config.json: |-
-    {
-      "nodePathMap":[
-        {
-          "node":"DEFAULT_PATH_FOR_ALL_NODES",
-          "paths":["/opt/local-path-provisioner"]
-        }
-      ]
-    }
----
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: standard
   annotations:
-    storageclass.kubernetes.io/is-default-class: "true"  
+    storageclass.kubernetes.io/is-default-class: "true"
 provisioner: rancher.io/local-path
 volumeBindingMode: WaitForFirstConsumer
