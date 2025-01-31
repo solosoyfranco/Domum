@@ -25,18 +25,19 @@ Running a “vanilla” Kubernetes distribution, where Talos handles the OS and 
      - Nocloud
      - amd64 (SecureBoot off)
      - System Extensions
-       - siderolabs/cloudflared (2024.12.1)
-       - siderolabs/qemu-guest-agent (9.2.0)
-       - siderolabs/tailscale
+       - ~~siderolabs/cloudflared (2024.12.1)~~(was giving me errors)
+       - ~~siderolabs/tailscale~~
+       - ~~siderolabs/zfs~~
+       - ~~siderolabs/nvidia-container-toolkit-lts~~
+       - ~~siderolabs/lldpd~~
+       - ~~siderolabs/thunderbolt~~
+       - ~~siderolabs/nut-client~~
        - siderolabs/btrfs
-       - siderolabs/zfs
-       - siderolabs/nvidia-container-toolkit-lts 
        - siderolabs/fuse3
-       - siderolabs/util-linux-tools
-       - siderolabs/intel-ucode or siderolabs/amd-ucode
-       - siderolabs/lldpd
-       - siderolabs/thunderbolt
-       - siderolabs/nut-client
+       - siderolabs/intel-ucode
+       - siderolabs/iscsi-tools (required by longhorn)
+       - siderolabs/util-linux-tools (required by longhorn)
+       - siderolabs/qemu-guest-agent
 
 2. Copy link for ISO and paste it on Proxmox for download and follow the instructions for the VM creations (https://www.talos.dev/v1.9/talos-guides/install/virtualized-platforms/proxmox/)
 3. Run the ControlPlane VM (set the IP address on my router)
@@ -100,8 +101,10 @@ export CONTROL_PLANE_IP=10.0.0.91
 ```bash
 
    #upgrade from factory.talos.dev (https://www.talos.dev/v1.9/talos-guides/upgrading-talos/)
-   talosctl updagrade -i factory.talos.dev/installer/ec5bdeb6f98993950c828f5545b3fbd205be7ad8dceee696cce6b2b9217269de:v1.9.3 --force
-   talosctl updagrade -n $WORKER_IP -i  factory.talos.dev/installer/ec5bdeb6f98993950c828f5545b3fbd205be7ad8dceee696cce6b2b9217269de:v1.9.3 --force
+   talosctl upgrade --image=factory.talos.dev/installer/b7615bc5ed2f5774cc5b1209043d13de7dc8d6146bbcd5ffbcacc29c80ea39f2:v1.9.3 -n 10.0.0.91 --force
+
+   #system extensions
+   talosctl get extensions -n 10.0.0.92
 
    # Get logs
    talosctl dmesg
@@ -158,6 +161,10 @@ export CONTROL_PLANE_IP=10.0.0.91
     ```bash
     export TALOSCONFIG="Secrets/ControlPlane-configs/talosconfig"
     ```
+
+---
+## **Longhorn Installation**
+
 
 ---
 
