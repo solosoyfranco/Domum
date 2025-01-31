@@ -1,9 +1,0 @@
-#Domum/cluster/infra/storageclass/local-path-provisioner.yaml
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: standard
-  annotations:
-    storageclass.kubernetes.io/is-default-class: "true"
-provisioner: rancher.io/local-path
-volumeBindingMode: WaitForFirstConsumer

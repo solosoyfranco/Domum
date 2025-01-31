@@ -1,8 +1,3 @@
 #Domum/cluster/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-resources:
-  - apps/vault
-  - helm-repos/hashicorp.yaml 
-  - infra/kustomization-flux.yaml
-  - infra/namespaces/vault.yaml
