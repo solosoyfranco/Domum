@@ -163,8 +163,35 @@ export CONTROL_PLANE_IP=10.0.0.91
     ```
 
 ---
+## ** Flux Installation **
+
+```bash
+#generate the PAT from github
+ flux bootstrap github \
+  --owner=solosoyfranco \
+  --repository=Domum \
+  --branch=main \
+  --path=cluster \
+  --personal
+
+#once is complete pull the files on git
+git pull origin main
+
+
+``` 
+
+---
+
 ## **Longhorn Installation**
 
+create the config
+```bash
+kubectl create -f cluster/infra/namespaces/longhorn.yaml
+kubectl create -f cluster/helm-repos/longhorn.yaml
+# apply it too
+# now create the app
+ kubectl apply -f cluster/apps/longhorn/longhorn.yaml
+``` 
 
 ---
 

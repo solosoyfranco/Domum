@@ -1,0 +1,21 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: longhorn
+  namespace: longhorn
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: longhorn
+      version: 1.8.0  # Use the latest version (https://github.com/longhorn/longhorn/releases)
+      sourceRef:
+        kind: HelmRepository
+        name: longhorn
+        namespace: flux-system
+  values:
+    persistence:
+      defaultClass: true
+    service:
+      ui:
+        type: ClusterIP
