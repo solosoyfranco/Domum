@@ -12,6 +12,6 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: longhorn-repo
-        namespace: longhorn-system 
+        namespace: flux-system
       version: v1.8.0
   interval: 1m0s
