@@ -191,6 +191,16 @@ kubectl create -f cluster/helm-repos/longhorn.yaml
 # apply it too
 # now create the app
  kubectl apply -f cluster/apps/longhorn/longhorn.yaml
+ #apply the service 
+ kubectl apply -f cluster/apps/longhorn/longhorn-app.yaml  
+ #access thry localhost8000
+ kubectl port-forward -n longhorn-system svc/longhorn-ui 8000:8000
+ #get the services and useful commands
+ kubectl get svc -n longhorn-system
+kubectl get deployment -n longhorn-system  
+#Check Longhorn Logs for Errors
+kubectl logs -n longhorn-system -l app=longhorn-manager
+kubectl logs -n longhorn-system -l app=longhorn-ui
 ``` 
 
 ---
