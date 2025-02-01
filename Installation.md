@@ -208,7 +208,7 @@ For a simple, production-like setup, I'm using Vault’s Raft integrated storage
 ### **2. Create a namespace for Vault**
 
    ```bash
-   kubectl create namespace vault
+
    ``` 
 ............
 

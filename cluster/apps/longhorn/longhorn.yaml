@@ -14,7 +14,7 @@
 #       version: 1.8.0
 #       sourceRef:
 #         kind: HelmRepository
-#         name: longhorn
+#         name: longhorn-repo
 #         namespace: flux-system
 #   values:
 #     persistence:
