@@ -1,0 +1,12 @@
+defaultSettings:
+  createDefaultDiskLabeledNodes: true # Automatically detects and configures disks on labeled nodes
+  defaultDataPath: "/var/lib/longhorn" # Ensure your Talos nodes have this directory
+  # backupTarget: "nfs://192.168.1.100:/mnt/longhorn-backups" # Set up a backup target if needed
+  nodeDownPodDeletionPolicy: "delete-both-statefulset-and-deployment-pod" # Cleans up pods if a node fails
+  concurrentAutomaticEngineUpgradePerNodeLimit: 1 # Limits automatic engine upgrades per node
+  storageMinimalAvailablePercentage: 10 # Ensures 10% of disk space remains free
+  uiEnabled: true # Ensures Longhorn UI is enabled
+  ingress:
+    enabled: true
+    host: "longhorn.lan" # Set an internal DNS entry for easy access
+    tls: false # Optional: Enable TLS if you have cert-manager
