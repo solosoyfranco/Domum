@@ -1,0 +1,19 @@
+# Domum/cluster/apps/longhorn/longhorn-values.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: longhorn-values
+  namespace: longhorn-system
+data:
+  values.yaml: |
+    defaultSettings:
+      createDefaultDiskLabeledNodes: true
+      defaultDataPath: "/var/lib/longhorn"
+      nodeDownPodDeletionPolicy: "delete-both-statefulset-and-deployment-pod"
+      concurrentAutomaticEngineUpgradePerNodeLimit: 1
+      storageMinimalAvailablePercentage: 10
+      uiEnabled: true
+      ingress:
+        enabled: true
+        host: "longhorn.lan"
+        tls: false
