@@ -1,4 +1,4 @@
-#Domum/cluster/helm-repos/longhorn-repo.yaml
+#Domum/cluster/apps/longhorn/longhorn-repo.yaml
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
