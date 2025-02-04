@@ -227,6 +227,14 @@ curl http://10.0.0.100
 kubectl delete deployments nginx-test
 ``` 
 
+## **Traefik + cert-manager Installation**
+```bash
+#cert manager 
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.1.1/cert-manager.yaml
+#traefik
+kubectl apply -f https://raw.githubusercontent.com/traefik/traefik/v3.3/docs/content/reference/dynamic-configuration/kubernetes-crd-definition-v1.yml
+
+``` 
 
 ## **HashiCorp Vault Installation**
 ## **Deploy HashiCorp Vault via Helm**
