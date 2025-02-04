@@ -1,0 +1,7 @@
+# cluster/apps/traefik/traefik-system.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: traefik-system
+  labels:
+    pod-security.kubernetes.io/enforce: baseline

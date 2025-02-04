@@ -1,0 +1,41 @@
+# cluster/apps/traefik/helmrelease.yaml
+#helm search repo traefik --versions 
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: traefik
+  namespace: traefik-system
+spec:
+  chart:
+    spec:
+      chart: traefik
+      sourceRef:
+        kind: HelmRepository
+        name: traefik
+        namespace: flux-system
+      version: "34.2.0"
+  interval: 1m0s
+  values:
+    installCRDs: false
+    ingressClass:
+      enabled: true
+      isDefaultClass: true
+    service:
+      type: LoadBalancer
+      annotations:
+        kube-vip.io/loadbalancerIPs: "10.0.0.100"
+    ports:
+      web:
+        port: 80
+      websecure:
+        port: 443
+    additionalArguments:
+      - "--api.dashboard=true"
+      - "--providers.kubernetesingress.ingressclass=traefik"
+      # - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      # - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+    dashboard:
+      enabled: true
+      ingressRoute:
+        enabled: true
+        host: traefik.lan

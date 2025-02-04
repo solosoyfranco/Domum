@@ -1,0 +1,15 @@
+# cluster/apps/traefik/dashboard.yaml
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-dashboard
+  namespace: traefik-system
+spec:
+  entryPoints:
+    - websecure # Use "web" if you dont have Cert-Manager set up
+  routes:
+    - match: Host(`traefik.lan`) || Host(`10.0.0.100`)
+      kind: Rule
+      services:
+        - name: api@internal
+          kind: TraefikService
