@@ -204,6 +204,29 @@ kubectl logs -n longhorn-system -l app=longhorn-ui
 ``` 
 
 ---
+## **Kube-VIP Installation**
+
+```bash
+# manually added in case is needed
+# helm repo add kube-vip https://kube-vip.github.io/helm-charts
+# helm repo update 
+helm search repo kube-vip/kube-vip --versions
+kubectl apply -f cluster/apps/kube-vip/helmrepository.yaml  
+kubectl apply -f cluster/apps/kube-vip/helmrelease.yaml   
+
+# result: 
+# > kubectl -n kube-system get pods -l app.kubernetes.io/name=kube-vip
+# NAME             READY   STATUS    RESTARTS   AGE
+# kube-vip-m5267   1/1     Running   0          5m47s
+# kube-vip-n8qfn   1/1     Running   0          5m47s
+# kube-vip-xrtdg   1/1     Running   0          5m47s
+#quick test
+kubectl apply -f cluster/apps/test/loadbalancer.yaml 
+kubectl apply -f cluster/apps/test/deployment.yaml 
+curl http://10.0.0.100
+kubectl delete deployments nginx-test
+``` 
+
 
 ## **HashiCorp Vault Installation**
 ## **Deploy HashiCorp Vault via Helm**
