@@ -147,20 +147,26 @@ Domum is a GitOps-driven homelab designed to integrate GitHub with a self-hosted
 ### File Structure
 ```bash
 Domum/
-├── clusters/
-│   └── production/          # Main cluster configs
-│       ├── flux-system/     # Flux bootstrap
-│       ├── infrastructure/  # Cluster-level services
-│       │   ├── kube-vip/
-│       │   ├── longhorn/
-│       │   └── traefik/
-│       ├── apps/            # User applications
-│       │   ├── pihole/
-│       │   ├── obsidian/
-│       │   └── cert-manager/
-│       └── sources/         # HelmRepositories
-├── talos/                   # Talos machine configs
 ├── .gitignore
-└── README.md
+├── docs/                           # documentations, instructions and comments
+└── kubernetes/                     
+    ├── config/                     # all config for kubernetes
+    │   ├── talos/
+    │   ├── flux/
+    │   └── helm/
+    ├── certificates/               # for certificates
+    │   └── cert-manager/
+    ├── app/                   # apps and services
+    │   ├── traefik/
+    │   ├── pihole/
+    │   ├── kubernetes-dashboard/
+    │   ├── obsidian/
+    │   ├── linkding/
+    │   └── ...
+    ├── db/                         # databases
+    │   └── pgadmin/
+    ├── private/                    # for secrets
+    │   └── vault/
+    └── ...
 
 ```
