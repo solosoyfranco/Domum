@@ -14,8 +14,38 @@ spec:
         namespace: flux-system
   interval: 5m
   values:
+    global:
+      tlsDisable: true  # Disable TLS for initial setup
     server:
       enabled: true
       ha:
         enabled: true
-        replicas: 3
+        replicas: 3  # Match your worker nodes
+        raft:
+          enabled: true
+          setNodeId: true
+      volumes:
+        - name: raft
+          persistentVolumeClaim:
+            claimName: vault-raft
+      volumeMounts:
+        - mountPath: /vault/data
+          name: raft
+      resources:
+        requests:
+          memory: "256Mi"
+          cpu: "100m"
+        limits:
+          memory: "512Mi"
+          cpu: "500m"
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 50
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app.kubernetes.io/name
+                      operator: In
+                      values: ["vault"]
+                topologyKey: kubernetes.io/hostname
