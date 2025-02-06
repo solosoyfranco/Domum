@@ -1,9 +1,0 @@
-#Domum/cluster/apps/longhorn/longhorn-repo.yaml
-apiVersion: source.toolkit.fluxcd.io/v1beta2
-kind: HelmRepository
-metadata:
-  name: longhorn-repo
-  namespace: flux-system
-spec:
-  interval: 10m
-  url: https://charts.longhorn.io

@@ -1,23 +1,28 @@
 # **Installation Process: Control Plane (Hybrid HA)**
-### **Overview**
-Setup using **Proxmox** with Talos VM's and **Raspberry Pi's**, Kubernetes cluster with integration for Hashicorp Vault with External Secrets Operator (ESO), and GitOps.
 
+## **Overview**
+
+Setup using **Proxmox** with Talos VM's and **Raspberry Pi's**, Kubernetes cluster with integration for Hashicorp Vault with External Secrets Operator (ESO), and GitOps.
 
 ---
 
 ## **Proxmox Installation**
 
 ### **VM Settings**
+
 - **Default Settings**
   - **HDD:** 10 GB
   - **Cores:** 2
-Follow these tutorial for the VM creation: https://www.talos.dev/v1.9/talos-guides/install/virtualized-platforms/proxmox/
+Follow these tutorial for the VM creation: <https://www.talos.dev/v1.9/talos-guides/install/virtualized-platforms/proxmox/>
+
 ---
 
 ## Talos Installation
+
 Running a “vanilla” Kubernetes distribution, where Talos handles the OS and Kubernetes lifecycle.
-1. Building the ISO: 
-   - go to https://factory.talos.dev
+
+1. Building the ISO:
+   - go to <https://factory.talos.dev>
    - Selections:
      - Cloud Server
      - Linux version:
@@ -39,18 +44,19 @@ Running a “vanilla” Kubernetes distribution, where Talos handles the OS and 
        - siderolabs/util-linux-tools (required by longhorn)
        - siderolabs/qemu-guest-agent
 
-2. Copy link for ISO and paste it on Proxmox for download and follow the instructions for the VM creations (https://www.talos.dev/v1.9/talos-guides/install/virtualized-platforms/proxmox/)
+2. Copy link for ISO and paste it on Proxmox for download and follow the instructions for the VM creations (<https://www.talos.dev/v1.9/talos-guides/install/virtualized-platforms/proxmox/>)
 3. Run the ControlPlane VM (set the IP address on my router)
 
-
 ### **From the Terminal**
+
 export this IP as a bash variable
+
 ```bash
 export CONTROL_PLANE_IP=10.0.0.91
-``` 
+```
 
 1. **Generate Talos Configuration:**
-   
+
    ```bash
       talosctl gen config Domum-ControlPlane https://$CONTROL_PLANE_IP:6443 -o Secrets/Talos
       #run this command to check if the disk is sda id
@@ -60,14 +66,14 @@ export CONTROL_PLANE_IP=10.0.0.91
    ```
 
 2. **Apply Configuration to the Control Plane VM:**
-   
+
    ```bash
       talosctl apply-config --insecure --nodes $CONTROL_PLANE_IP --file Secrets/Talos/controlplane.yaml
 
    ```
 
 3. **Apply Configuration to the Worker VM:**
-   
+
    ```bash
       export WORKER_IP=10.0.0.92
       talosctl apply-config --insecure --nodes $WORKER_IP --file Secrets/Talos/worker.yaml
@@ -75,7 +81,7 @@ export CONTROL_PLANE_IP=10.0.0.91
    ```
 
 4. **Using the Cluster:**
-   
+
    ```bash
       export TALOSCONFIG="Secrets/Talos/talosconfig"
       talosctl config endpoint $CONTROL_PLANE_IP
@@ -87,17 +93,22 @@ export CONTROL_PLANE_IP=10.0.0.91
       talosctl dashboard --talosconfig Secrets/Talos/talosconfig --nodes 10.0.0.91,10.0.0.92
 
    ```
+
 5. **Bootstrap Etcd:**
+
    ```bash
       talosctl bootstrap
-   ``` 
+   ```
+
 6. **Retrieve the kubeconfig**
+
 ```bash
    talosctl kubeconfig .
 
-``` 
+```
 
-7. **Additional/Useful commands**
+## **Additional/Useful commands**
+
 ```bash
 
    #upgrade from factory.talos.dev (https://www.talos.dev/v1.9/talos-guides/upgrading-talos/)
@@ -124,8 +135,9 @@ export CONTROL_PLANE_IP=10.0.0.91
 
    ```
 
-8. **Add an alias for easier use:**
+**Add an alias for easier use:**
    Add this to your `~/.zshrc` file:
+
    ```bash
    alias gitdomum='cd "CloudDocs/Git/Domum"'
    export KUBECONFIG="Secrets/Talos/kubeconfig"
@@ -137,12 +149,13 @@ export CONTROL_PLANE_IP=10.0.0.91
 ## **Managing Secrets**
 
 ### **Step 1: Add a `.gitignore` File**
-    Create or edit the `.gitignore` file:
+
+   Create or edit the `.gitignore` file:
     ```bash
     nano .gitignore
     ```
 
-    Add the following lines:
+   Add the following lines:
     ```plaintext
     # Ignore Talos configuration files
     Secrets/
@@ -152,18 +165,21 @@ export CONTROL_PLANE_IP=10.0.0.91
     ```
 
 ### **Step 2: Prevent Accidental Upload of Existing Files**
-    Untrack sensitive files:
+
+   Untrack sensitive files:
     ```bash
     git rm --cached Secrets/ControlPane-configs/controlplane.yaml
     ```
 
 ### **Step 3: Export Talos Environment Variable**
-    ```bash
-    export TALOSCONFIG="Secrets/ControlPlane-configs/talosconfig"
-    ```
+
+   ```bash
+      export TALOSCONFIG="Secrets/ControlPlane-configs/talosconfig"
+   ```
 
 ---
-## ** Flux Installation **
+
+## **Flux Installation**
 
 ```bash
 #generate the PAT from github
@@ -178,13 +194,14 @@ export CONTROL_PLANE_IP=10.0.0.91
 git pull origin main
 
 
-``` 
+```
 
 ---
 
 ## **Longhorn Installation**
 
 create the config
+
 ```bash
 kubectl create -f cluster/infra/namespaces/longhorn.yaml
 kubectl create -f cluster/helm-repos/longhorn.yaml
@@ -201,9 +218,10 @@ kubectl get deployment -n longhorn-system
 #Check Longhorn Logs for Errors
 kubectl logs -n longhorn-system -l app=longhorn-manager
 kubectl logs -n longhorn-system -l app=longhorn-ui
-``` 
+```
 
 ---
+
 ## **Kube-VIP Installation**
 
 ```bash
@@ -225,35 +243,43 @@ kubectl apply -f cluster/apps/test/loadbalancer.yaml
 kubectl apply -f cluster/apps/test/deployment.yaml 
 curl http://10.0.0.100
 kubectl delete deployments nginx-test
-``` 
+```
 
 ## **Traefik + cert-manager Installation**
+
 ```bash
 #cert manager check latest version https://github.com/cert-manager/cert-manager/releases
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.17.0/cert-manager.yaml
 #traefik
 kubectl apply -f https://raw.githubusercontent.com/traefik/traefik/v3.3/docs/content/reference/dynamic-configuration/kubernetes-crd-definition-v1.yml
 
-``` 
+```
 
 ## **HashiCorp Vault Installation**
+
 ## **Deploy HashiCorp Vault via Helm**
+
 For a simple, production-like setup, I'm using Vault’s Raft integrated storage.
 
 ### **1. Add the HashiCorp Helm repository**
-    ```bash
-    helm repo add hashicorp https://helm.releases.hashicorp.com
-    helm repo update    
-    ```
+
+   ```bash
+
+    $ helm repo add hashicorp https://helm.releases.hashicorp.com
+   #"hashicorp" has been added to your repositories
+    helm repo update
+
+   helm install vault hashicorp/vault
+   ```
 
 ### **2. Create a namespace for Vault**
 
    ```bash
 
-   ``` 
+   ```
+
 ............
 
 ---
 
-
---- 
+---
