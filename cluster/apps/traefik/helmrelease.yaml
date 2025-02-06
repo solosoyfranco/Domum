@@ -32,8 +32,8 @@ spec:
     additionalArguments:
       - "--api.dashboard=true"
       - "--providers.kubernetesingress.ingressclass=traefik"
-      # - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
-      # - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure" # greyed out if you dont have Cert-Manager
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https" # greyed out if you dont have Cert-Manager
     dashboard:
       enabled: true
       ingressRoute:
