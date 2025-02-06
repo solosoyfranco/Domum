@@ -1,9 +1,8 @@
 # Ignore Secrets directory to protect sensitive configuration files
-Secrets/
-Secrets/ControlPane-configs/
-Secrets/ControlPane-configs/controlplane.yaml
-Secrets/ControlPane-configs/worker.yaml
-Secrets/ControlPane-configs/talosconfig
+/kubernetes/private/**/*
+!/kubernetes/private/README.md
+*.kubeconfig
+/talos/generated/*
 
 # Ignore Kubernetes configuration files
 *.kubeconfig
