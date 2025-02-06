@@ -6,10 +6,12 @@ metadata:
   namespace: traefik-system
 spec:
   entryPoints:
-    - websecure # Use "web" if you dont have Cert-Manager set up
+    - websecure
   routes:
     - match: Host(`traefik.lan`) || Host(`10.0.0.100`)
       kind: Rule
       services:
         - name: api@internal
           kind: TraefikService
+  tls:
+    secretName: traefik-dashboard-tls
