@@ -15,6 +15,6 @@ defaultSettings:
   storageMinimalAvailablePercentage: 10 # Ensures 10% of disk space remains free
   uiEnabled: true # Ensures Longhorn UI is enabled
   ingress:
-    enabled: true
+    enabled: false
     host: "longhorn.lan" # Set an internal DNS entry for easy access
     tls: false # Optional: Enable TLS if you have cert-manager set up

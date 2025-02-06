@@ -1,0 +1,17 @@
+#cluster/apps/longhorn/dashboard.yaml
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: longhorn-dashboard
+  namespace: longhorn-system
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`longhorn.lan`)
+      kind: Rule
+      services:
+        - name: longhorn-ui
+          port: 8000
+  tls:
+    secretName: longhorn-dashboard-tls
