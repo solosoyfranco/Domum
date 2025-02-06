@@ -1,9 +1,0 @@
-# cluster/apps/kube-vip/helmrepository.yaml
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: HelmRepository
-metadata:
-  name: kube-vip
-  namespace: flux-system
-spec:
-  interval: 10m
-  url: https://kube-vip.github.io/helm-charts

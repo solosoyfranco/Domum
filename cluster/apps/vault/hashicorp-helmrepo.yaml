@@ -1,9 +1,0 @@
-#cluster/apps/vault/hashicorp-helmrepo.yaml
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: HelmRepository
-metadata:
-  name: hashicorp
-  namespace: flux-system
-spec:
-  interval: 10m
-  url: https://helm.releases.hashicorp.com
