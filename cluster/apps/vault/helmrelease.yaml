@@ -20,7 +20,7 @@ spec:
       enabled: true
       ha:
         enabled: true
-        replicas: 3  # Match your worker nodes
+        replicas: 2  # Match your worker nodes
         raft:
           enabled: true
           setNodeId: true
@@ -40,8 +40,9 @@ spec:
           cpu: "500m"
       affinity:
         podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution: []  # Remove strict anti-affinity
           preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 50
+            - weight: 100
               podAffinityTerm:
                 labelSelector:
                   matchExpressions:
