@@ -15,6 +15,14 @@ Setup using **Proxmox** with Talos VM's and **Raspberry Pi's**, Kubernetes clust
   - **Cores:** 2
 Follow these tutorial for the VM creation: <https://www.talos.dev/v1.9/talos-guides/install/virtualized-platforms/proxmox/>
 
+## **Rpi4 Installation v1.9.3**
+from (https://github.com/siderolabs/sbc-raspberrypi/issues/38) 
+```bash
+   curl -X POST --data-binary @rpi-config.yaml https://factory.talos.dev/schematics
+   #{"id":"b21b89eb69a49191ba3eb72ff583bce6da242cfcdb1b9b108d0b10ad26bb13e8"}
+   curl -o talos-rpi4.img.xz https://factory.talos.dev/image/b21b89eb69a49191ba3eb72ff583bce6da242cfcdb1b9b108d0b10ad26bb13e8/v1.9.3/metal-arm64.raw.xz
+``` 
+
 ---
 
 ## Talos Installation

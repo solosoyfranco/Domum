@@ -13,6 +13,15 @@ kubeconfig
 *.key
 *.crt
 *.csr
+# Ignore secrets, keys, and temporary files
+**/*.key
+**/*.pem
+**/*.crt
+**/*.kubeconfig
+**/private/
+.env
+*.secret.yaml
+/tmp/
 
 # Ignore macOS system files
 *.DS_Store
