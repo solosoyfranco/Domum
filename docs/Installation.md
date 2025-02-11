@@ -1,192 +1,274 @@
-# **Installation Process: Control Plane (Hybrid HA)**
+# **Talos Linux Kubernetes Cluster Deployment Guide**
 
 ## **Overview**
 
-Setup using **Proxmox** with Talos VM's and **Raspberry Pi's**, Kubernetes cluster with integration for Hashicorp Vault with External Secrets Operator (ESO), and GitOps.
+This guide walks through setting up a **Talos Linux Kubernetes Cluster** on **Proxmox** and **Raspberry Pi 4B**. It includes integration for **Hashicorp Vault**, **External Secrets Operator (ESO)**, and **GitOps**.
 
 ---
 
-## **Proxmox Installation**
+## **1. Proxmox Installation**
 
 ### **VM Settings**
 
-- **Default Settings**
+- **Default Settings**:
   - **HDD:** 10 GB
   - **Cores:** 2
-Follow these tutorial for the VM creation: <https://www.talos.dev/v1.9/talos-guides/install/virtualized-platforms/proxmox/>
 
-## **Rpi4 Installation v1.9.3**
-from (https://github.com/siderolabs/sbc-raspberrypi/issues/38) 
-```bash
-   curl -X POST --data-binary @rpi-config.yaml https://factory.talos.dev/schematics
-   #{"id":"b21b89eb69a49191ba3eb72ff583bce6da242cfcdb1b9b108d0b10ad26bb13e8"}
-   curl -o talos-rpi4.img.xz https://factory.talos.dev/image/b21b89eb69a49191ba3eb72ff583bce6da242cfcdb1b9b108d0b10ad26bb13e8/v1.9.3/metal-arm64.raw.xz
-``` 
+Follow the official guide for VM creation: [Talos on Proxmox](https://www.talos.dev/v1.9/talos-guides/install/virtualized-platforms/proxmox/).
 
 ---
 
-## Talos Installation
+## **2. Raspberry Pi 4B Installation (v1.9.3)**
 
-Running a “vanilla” Kubernetes distribution, where Talos handles the OS and Kubernetes lifecycle.
-
-1. Building the ISO:
-   - go to <https://factory.talos.dev>
-   - Selections:
-     - Cloud Server
-     - Linux version:
-     - 1.9.3
-     - Nocloud
-     - amd64 (SecureBoot off)
-     - System Extensions
-       - ~~siderolabs/cloudflared (2024.12.1)~~(was giving me errors)
-       - ~~siderolabs/tailscale~~
-       - ~~siderolabs/zfs~~
-       - ~~siderolabs/nvidia-container-toolkit-lts~~
-       - ~~siderolabs/lldpd~~
-       - ~~siderolabs/thunderbolt~~
-       - ~~siderolabs/nut-client~~
-       - siderolabs/btrfs
-       - siderolabs/fuse3
-       - siderolabs/intel-ucode
-       - siderolabs/iscsi-tools (required by longhorn)
-       - siderolabs/util-linux-tools (required by longhorn)
-       - siderolabs/qemu-guest-agent
-
-2. Copy link for ISO and paste it on Proxmox for download and follow the instructions for the VM creations (<https://www.talos.dev/v1.9/talos-guides/install/virtualized-platforms/proxmox/>)
-3. Run the ControlPlane VM (set the IP address on my router)
-
-### **From the Terminal**
-
-export this IP as a bash variable
+### **Create Custom Talos Image for RPi4**
 
 ```bash
-export CONTROL_PLANE_IP=10.0.0.91
+curl -X POST --data-binary @rpi-config.yaml https://factory.talos.dev/schematics
+# Expected Output:
+# {"id":"b21b89eb69a49191ba3eb72ff583bce6da242cfcdb1b9b108d0b10ad26bb13e8"}
+
+curl -o talos-rpi4.img.xz https://factory.talos.dev/image/b21b89eb69a49191ba3eb72ff583bce6da242cfcdb1b9b108d0b10ad26bb13e8/v1.9.3/metal-arm64.raw.xz
 ```
 
-1. **Generate Talos Configuration:**
+---
 
-   ```bash
-      talosctl gen config Domum-ControlPlane https://$CONTROL_PLANE_IP:6443 -o Secrets/Talos
-      #run this command to check if the disk is sda id
-      talosctl get disks --insecure --nodes $CONTROL_PLANE_IP
-      #example
-      ##runtime     Disk   sda      1         11 GB    false       virtio                          QEMU HARDDISK   
-   ```
+## **3. Talos Installation (Vanilla Kubernetes Distribution)**
 
-2. **Apply Configuration to the Control Plane VM:**
+### **ISO Generation for Proxmox**
 
-   ```bash
-      talosctl apply-config --insecure --nodes $CONTROL_PLANE_IP --file Secrets/Talos/controlplane.yaml
+1. Visit [Talos Factory](https://factory.talos.dev) and generate an ISO with:
+   - **Platform**: Cloud Server
+   - **Version**: 1.9.3
+   - **Architecture**: amd64 (SecureBoot OFF)
+   - **System Extensions**:
+     - siderolabs/btrfs
+     - siderolabs/fuse3
+     - siderolabs/intel-ucode
+     - siderolabs/iscsi-tools (Required for Longhorn)
+     - siderolabs/util-linux-tools (Required for Longhorn)
+     - siderolabs/qemu-guest-agent
 
-   ```
+2. Download the ISO to **Proxmox**, create the VM, and boot the Control Plane.
 
-3. **Apply Configuration to the Worker VM:**
+---
 
-   ```bash
-      export WORKER_IP=10.0.0.92
-      talosctl apply-config --insecure --nodes $WORKER_IP --file Secrets/Talos/worker.yaml
+## **4. Configure Talos Cluster**
 
-   ```
-
-4. **Using the Cluster:**
-
-   ```bash
-      export TALOSCONFIG="Secrets/Talos/talosconfig"
-      talosctl config endpoint $CONTROL_PLANE_IP
-      talosctl config node $CONTROL_PLANE_IP
-
-      #get the dashboard
-      talosctl dashboard --talosconfig Secrets/Talos/talosconfig
-      #open multiple nodes dashboard
-      talosctl dashboard --talosconfig Secrets/Talos/talosconfig --nodes 10.0.0.91,10.0.0.92
-
-   ```
-
-5. **Bootstrap Etcd:**
-
-   ```bash
-      talosctl bootstrap
-   ```
-
-6. **Retrieve the kubeconfig**
+### **Generate Configuration Files**
 
 ```bash
-   talosctl kubeconfig .
-
+talosctl gen config talos-cluster https://10.0.0.90:6443 --output kubernetes/config/talos \
+         --with-docs=false \
+         --with-examples=false \
+         --additional-sans 10.0.0.90,10.0.0.91,10.0.0.92
 ```
 
-## **Additional/Useful commands**
+#### **Generated Files**
+```
+kubernetes/config/talos/
+├── controlplane.yaml
+├── worker.yaml
+├── talosconfig
+```
+
+#### **Check Disk ID**
 
 ```bash
-
-   #upgrade from factory.talos.dev (https://www.talos.dev/v1.9/talos-guides/upgrading-talos/)
-   talosctl upgrade --image=factory.talos.dev/installer/b7615bc5ed2f5774cc5b1209043d13de7dc8d6146bbcd5ffbcacc29c80ea39f2:v1.9.3 -n 10.0.0.91 --force
-
-   #system extensions
-   talosctl get extensions -n 10.0.0.92
-
-   # Get logs
-   talosctl dmesg
-
-   
-   # Check nodes
-   kubectl get nodes
-
-   # Check services
-   talosctl -n 10.0.0.90 services
-
-   # Check contexts
-   talosctl config contexts
-
-   # Set a context
-   talosctl config context Domum-ControlPlane
-
-   ```
-
-**Add an alias for easier use:**
-   Add this to your `~/.zshrc` file:
-
-   ```bash
-   alias gitdomum='cd "CloudDocs/Git/Domum"'
-   export KUBECONFIG="Secrets/Talos/kubeconfig"
-   source ~/.zshrc
-   ```
+talosctl get disks --insecure --nodes 10.0.0.90
+```
 
 ---
 
-## **Managing Secrets**
+### **Create Patch Files for Disk Installation**
 
-### **Step 1: Add a `.gitignore` File**
+```bash
+touch kubernetes/config/talos/patch-x86.yaml
+# Content
+machine:
+  install:
+    disk: /dev/sda
 
-   Create or edit the `.gitignore` file:
-    ```bash
-    nano .gitignore
-    ```
 
-   Add the following lines:
-    ```plaintext
-    # Ignore Talos configuration files
-    Secrets/
-    Secrets/ControlPlane-configs/controlplane.yaml
-    Secrets/ControlPlane-configs/worker.yaml
-    Secrets/ControlPlane-configs/talosconfig
-    ```
+# For Raspberry Pi
 
-### **Step 2: Prevent Accidental Upload of Existing Files**
-
-   Untrack sensitive files:
-    ```bash
-    git rm --cached Secrets/ControlPane-configs/controlplane.yaml
-    ```
-
-### **Step 3: Export Talos Environment Variable**
-
-   ```bash
-      export TALOSCONFIG="Secrets/ControlPlane-configs/talosconfig"
-   ```
+touch kubernetes/config/talos/patch-rpi.yaml
+# Content
+machine:
+  install:
+    disk: /dev/mmcblk0
+```
 
 ---
 
+## **5. Apply Configuration to Nodes**
+
+### **Control Plane Nodes**
+
+```bash
+talosctl apply-config -n 10.0.0.90 \
+    -f kubernetes/config/talos/controlplane.yaml \
+    --config-patch @kubernetes/config/talos/patch-rpi.yaml \
+    --insecure
+```
+
+```bash
+talosctl apply-config -n 10.0.0.91 \
+    -f kubernetes/config/talos/controlplane.yaml \
+    --config-patch @kubernetes/config/talos/patch-x86.yaml \
+    --insecure
+```
+
+```bash
+talosctl apply-config -n 10.0.0.92 \
+    -f kubernetes/config/talos/controlplane.yaml \
+    --config-patch @kubernetes/config/talos/patch-x86.yaml \
+    --insecure
+```
+
+---
+
+## **6. Set Talos Configuration Endpoint**
+
+```bash
+talosctl config endpoint 10.0.0.90
+```
+
+```bash
+talosctl config endpoint 10.0.0.91
+```
+
+```bash
+talosctl config endpoint 10.0.0.92
+```
+
+---
+
+## **7. Bootstrap the Control Plane**
+
+```bash
+talosctl bootstrap -n 10.0.0.90
+```
+
+---
+
+## **8. Retrieve Kubernetes Configuration**
+
+```bash
+talosctl kubeconfig -n 10.0.0.90
+export KUBECONFIG=kubernetes/config/talos/kubeconfig
+```
+
+---
+
+## **9. Verify Cluster Status**
+
+```bash
+kubectl get nodes
+```
+
+**Expected Output:**
+
+```
+NAME                    STATUS   ROLES           AGE     VERSION
+controlplane-rpi4-90    Ready    control-plane   2m47s   v1.32.1
+controlplane-91         Ready    control-plane   2m39s   v1.32.1
+controlplane-92         Ready    control-plane   2m51s   v1.32.1
+```
+
+---
+
+## **10. Configure Worker Nodes**
+
+```bash
+talosctl apply-config --insecure --nodes 10.0.0.93 --file kubernetes/config/talos/worker.yaml
+```
+
+```bash
+talosctl apply-config --insecure --nodes 10.0.0.94 --file kubernetes/config/talos/worker.yaml
+```
+
+```bash
+talosctl apply-config --insecure --nodes 10.0.0.95 --file kubernetes/config/talos/worker.yaml
+```
+
+---
+
+## **11. Check Installed Extensions**
+
+```bash
+talosctl get extensions -n 10.0.0.90
+```
+```bash
+talosctl get extensions -n 10.0.0.91
+```
+```bash
+talosctl get extensions -n 10.0.0.92
+```
+
+---
+
+## **12. Upgrade Talos**
+
+```bash
+talosctl upgrade --image=factory.talos.dev/installer/b7615bc5ed2f5774cc5b1209043d13de7dc8d6146bbcd5ffbcacc29c80ea39f2:v1.9.3 -n 10.0.0.91 --force
+```
+
+---
+
+## **13. Monitoring and Debugging**
+
+### **Check Logs**
+```bash
+talosctl dmesg
+```
+
+### **Check Node Status**
+```bash
+kubectl get nodes
+```
+
+### **Check Services on Nodes**
+```bash
+talosctl -n 10.0.0.90 services
+```
+
+### **List Talos Contexts**
+```bash
+talosctl config contexts
+```
+
+### **Set Context**
+```bash
+talosctl config context Domum-ControlPlane
+```
+
+### **Debugging Commands**
+```bash
+talosctl dmesg -n 10.0.0.90
+talosctl logs -n 10.0.0.91
+talosctl dashboard --talosconfig kubernetes/config/talos/talosconfig
+```
+
+---
+
+**Setup Alias for Quick Access:**
+```bash
+echo 'alias gitdomum="cd CloudDocs/Git/Domum"' >> ~/.zshrc
+source ~/.zshrc
+
+
+---
+control plane HA
+kubectl apply -f kubernetes/app/kube-vip/rbac.yaml   
+kubectl apply -f kubernetes/app/kube-vip/daemonset.yaml
+diagnosis: 
+kubectl describe ds kube-vip -n kube-system
+kubectl get pods -n kube-system
+kubectl logs daemonset/kube-vip -n kube-system
+
+---
+trying to patch the new VIP loadbalancer for controlplane
+---
 ## **Flux Installation**
 
 ```bash
