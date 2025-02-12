@@ -1,6 +1,6 @@
 # Ignore Secrets directory to protect sensitive configuration files
-/kubernetes/private/**/*
-!/kubernetes/private/README.md
+/cluster/private/**/*
+!/cluster/private/README.md
 *.kubeconfig
 /talos/generated/*
 

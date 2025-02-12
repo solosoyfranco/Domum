@@ -1,153 +1,105 @@
 # Domum: A GitOps-Driven Homelab
 
-## The Vision
-Domum is a GitOps-driven homelab designed to integrate GitHub with a self-hosted Kubernetes cluster for seamless automated service deployments. This setup leverages Flux CD for continuous integration and deployment (CI/CD) workflows, with Prometheus and Grafana providing robust monitoring capabilities. The project showcases expertise in:
-
-- **Infrastructure as Code (IaC):** Declarative and reproducible configurations.
-- **Container Orchestration:** Efficient resource management and scaling.
-- **Enterprise-Grade DevOps Practices:** Scalable and resilient design.
+Domum is a GitOps-driven homelab that leverages **Talos Linux**, **Flux CD**, and **Kubernetes** to automate service deployments. This repository showcases how modern DevOps principles—Infrastructure as Code, CI/CD, and container orchestration—can be combined to create a **scalable**, **resilient**, and **self-documenting** homelab environment.
 
 ---
 
-## Infrastructure Overview
+## 1. Vision & Key Features
+
+- **Infrastructure as Code (IaC):** All configurations, from cluster provisioning to application deployments, are captured as declarative YAML.  
+- **GitOps Workflow:** Flux CD continuously watches this repository for changes, applying them to the Kubernetes cluster automatically.  
+- **Observability & Monitoring:** Prometheus and Grafana (planned or in-progress) to provide real-time insights into cluster health and performance.  
+- **Enterprise-Grade DevOps Practices:** Emphasis on security, backups, and high availability through tools like Hashicorp Vault, MetalLB, etc.
+
+---
+
+## 2. Infrastructure Overview
 
 ### Network
-- **Connection:** 1Gbps Fiber
-- **Router:** OpenWRT
-- **Switches and Access Points:** UniFi APs, Switches, and Cisco hardware
+- **1Gbps Fiber** connection  
+- **Router:** OpenWRT  
+- **Switches & APs:** UniFi, Cisco hardware
 
 ### Hardware
-- **Servers:** 3x Proxmox nodes
-- **Edge Devices:** 6x Raspberry Pi 5,4,3
+- **Proxmox Nodes (x3):** Primary compute infrastructure for VMs and LXC containers  
+- **Raspberry Pis (x6):** For edge services, experimentation, or dedicated workloads  
 - **Workstations:**
-  - Fedora Workstation
-  - Windows 11
-  - macOS
+  - Fedora Workstation  
+  - Windows 11  
+  - macOS  
+
+*For specific network subnets, VLANs, or hardware specs, see [docs/NETWORKING.md](./docs/NETWORKING.md) or [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md).*
 
 ---
 
-## Tools and Setup
+## 3. Tools & Setup
 
 ### Prerequisites
-1. **Install `talosctl` (Talos CLI)**
-   - On macOS, run:
-    ```bash
-      brew install talosctl kubectl helm fluxcd/tap/flux age sops
-    ```
 
-    ``` 
+1. **Talos CLI (`talosctl`), plus supporting tools**  
+   - For macOS, an example installation:
+     ```bash
+     brew install talosctl kubectl helm fluxcd/tap/flux age sops
+     ```
 
+2. **Talos Linux ISO**  
+   - Download the latest stable release ([Talos v1.9+](https://github.com/siderolabs/talos/releases))  
+   - Refer to the official [Talos Proxmox Guide](https://www.talos.dev/v1.9/talos-guides/install/virtualized-platforms/proxmox/) for instructions on creating a VM.
 
-2. **Download Talos Linux**
-   - For Proxmox, download the latest Talos release (e.g., `MetalAMD64.iso`) from [Talos Releases](https://github.com/siderolabs/talos/releases/tag/v1.9.1).
+> **For detailed installation steps** (Talos on Proxmox, node bootstrapping, etc.), see [docs/TALOS_SETUP.md](./docs/TALOS_SETUP.md).
 
-### Installation Notes
-- Use the downloaded Talos ISO to create a VM in Proxmox.
-- [Talos documentation for proxmox](https://www.talos.dev/v1.9/talos-guides/install/virtualized-platforms/proxmox/) .
-
-
-
-# To-Do List for Proxmox and Kubernetes
-
-## Proxmox VMs/LXC - High Availability Setup
-
-- [x] OpenWrt 
-- [x] Pi-hole (backup instance)
-- [x] Home Assistant
-- [x] Homebridge
-- [x] Tailscale
-- [x] Kubernetes Control Plane
-- [x] Hashicorp Vault
-- [x] UniFi
-
-## Kubernetes Cluster Setup
-
-- [ ] **Hashicorp Vault**
-  - Deploy on a separate VM with multiple backups.
-  - Integrate Kubernetes, KV (Key-Value store), and other secrets management.
-  - Add MFA for enhanced security.
-
-- [ ] **MetalLB**
-  - Configure MetalLB to assign IP addresses in the range 10.0.0.100-199 for all services.
-  - Ensure a static and predictable IP assignment to maintain sanity.
-
-- [ ] **Kubernetes Dashboard**
-  - Deploy and configure with the static IP: `10.0.0.100`.
-
-- [ ] **Homepage**
-  - Install and set up [Homepage](https://github.com/gethomepage/homepage) with the static IP: `10.0.0.101`.
-
-- [ ] **Pi-hole Main**
-  - Deploy the main Pi-hole instance in the cluster.
-
-- [ ] **PGAdmin**
-  - Deploy PGAdmin for PostgreSQL management.
-
-- [ ] **Grafana**
-  - Set up Grafana for monitoring and visualization.
-
-- [ ] **Transmission**
-  - Deploy Transmission for torrent management.
-
-- [ ] **CommaFeed**
-  - Deploy CommaFeed for RSS feed aggregation.
-
-- [ ] **Wallabag**
-  - Deploy Wallabag for managing and saving articles.
-
-- [ ] **Linkding**
-  - Set up Linkding for bookmark management.
-
-- [ ] **n8n**
-  - Deploy n8n for workflow automation.
-
-- [ ] **VS Code-Server**
-  - Install and configure the VS Code Server for remote development.
-
-- [ ] **Obsidian Server**
-  - Deploy Obsidian for note-taking and knowledge management.
-
-- [ ] **Calibre-Web**
-  - eBook collection for easy reading access..
-
-- [ ] **Uptime Kuma**
-  - Monitor the uptime of your services and websites with a clean UI.
-
-- [ ] **Paperless-ngx**
-  - Document scanning and management system for going paperless.
-  
-- [ ] **LLM-Services**
-  -  AI language models for experimentation.
 ---
 
-### Additional Notes
-- Ensure proper backups and testing before making configurations live.
-- Maintain documentation for each service to ensure replicability and troubleshooting.
+## 4. Roadmap & To-Do
 
+Below is a **living to-do list** covering both Proxmox-based VMs (as a transitional phase) and full Kubernetes deployments:
 
-### File Structure
+### Hardware/VM Tasks
+- [ ] Migrate **OpenWRT** to kube-virt (currently on Proxmox)  
+- [ ] Migrate **Home Assistant** to kube-virt  
+- [ ] Migrate **Pi-hole** (backup instance) to the cluster  
+- [ ] Convert **Homebridge**, **UniFi**, **Tailscale**, etc., to containers or kube-virt
+
+### Kubernetes Cluster Setup
+- [ ] **Hashicorp Vault**  
+  - Multi-backup strategy, KV engine, MFA integration  
+- [ ] **MetalLB**  
+  - Allocate service IP range: `10.0.0.100-10.0.0.199`  
+- [ ] **Kubernetes Dashboard** @ `10.0.0.100`  
+- [ ] **Homepage** @ `10.0.0.101`  
+- [ ] **Pi-hole (Main)**  
+- [ ] **PGAdmin**  
+- [ ] **Grafana** (plus Prometheus)  
+- [ ] **Transmission**, **CommaFeed**, **Wallabag**, **Linkding**, etc.  
+- [ ] **n8n** for workflow automation  
+- [ ] **VS Code-Server** for remote development  
+- [ ] **Obsidian Server** for knowledge management  
+- [ ] **Calibre-Web** for eBook library  
+- [ ] **Uptime Kuma** for service monitoring  
+- [ ] **Paperless-ngx** for document management  
+- [ ] **LLM-Services** for AI experimentation  
+
+*(Future tasks and services can be appended as needed.)*
+
+---
+
+## 5. File Structure Overview
+
+A high-level look at how this repository is organized:
+
 ```bash
 Domum/
 ├── .gitignore
-├── docs/                           # documentations, instructions and comments
-└── kubernetes/                     
-    ├── config/                     # all config for kubernetes
-    │   ├── talos/
-    │   ├── flux/
-    │   └── helm/
-    ├── certificates/               # for certificates
-    │   └── cert-manager/
-    ├── app/                   # apps and services
-    │   ├── traefik/
-    │   ├── pihole/
-    │   ├── kubernetes-dashboard/
-    │   ├── obsidian/
-    │   ├── linkding/
-    │   └── ...
-    ├── db/                         # databases
-    │   └── pgadmin/
-    ├── private/                    # for secrets
-    │   └── vault/
-    └── ...
-
+├── .sops.yaml                 # SOPS config (if using sealed secrets or encryption)
+├── docs/
+│   ├── ARCHITECTURE.md        # Notes on overall cluster design
+│   ├── NETWORKING.md          # IP schema, VLANs, etc.
+│   └── TALOS_SETUP.md         # Detailed Talos install guides
+└── cluster/
+    ├── base/                  # Environment-agnostic or "common" configs
+    ├── core/                  # Critical cluster infrastructure (Talos configs, Flux, etc.)
+    ├── apps/                  # Application definitions (Traefik, Pi-hole, Vault, etc.)
+    ├── overlays/              # Environment-specific patches (dev, homelab, prod)
+    ├── private/               # Sensitive data (encrypted or references to Vault)
+    └── scripts/               # Helper scripts (talos-genconfig, flux-sync, etc.)
 ```
