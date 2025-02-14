@@ -1,3 +1,4 @@
+#cluster/core/02-longhorn/helmrelease.yaml
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -14,3 +15,18 @@ spec:
         name: longhorn-repo
       version: v1.8.0
   interval: 1m0s
+  values:
+    longhornManager:
+      securityContext:
+        privileged: true
+    csi:
+      enableCSI: true
+      attacherImage: "longhornio/csi-attacher:v4.8.0"
+      provisionerImage: "longhornio/csi-provisioner:v5.1.0"
+      nodeDriverRegistrarImage: "longhornio/csi-node-driver-registrar:v2.13.0"
+      resizerImage: "longhornio/csi-resizer:v1.13.1"
+      snapshotterImage: "longhornio/csi-snapshotter:v8.2.0"
+      livenessProbeImage: "longhornio/livenessprobe:v2.15.0"
+    global:
+      podSecurityPolicy:
+        enabled: true
