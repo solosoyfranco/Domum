@@ -1,0 +1,12 @@
+machine:
+  network:
+    interfaces:
+      - deviceSelector:
+          physical: true  
+        dhcp: true
+        vip:
+          ip: 10.0.0.100
+
+cluster:
+  controlPlane:
+    endpoint: https://10.0.0.100:6443

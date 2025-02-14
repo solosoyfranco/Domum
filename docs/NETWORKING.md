@@ -6,7 +6,7 @@ This document describes the network layout, VLAN segments, and IP schema for the
 
 ## 1. Overview
 
-- **Router:** OpenWRT (running on a dedicated router device or VM)
+- **Router:** UniFi Router
 - **Core Switch(es):** UniFi/Cisco managed switches
 - **Wireless APs:** UniFi APs
 - **Gateway/Subnet:** `10.0.0.0/24` (primary LAN)
@@ -40,8 +40,8 @@ This document describes the network layout, VLAN segments, and IP schema for the
 
 ## 3. DNS & DHCP
 
-- **DNS** is handled by Pi-hole (or Unbound) on the homelab VLAN.  
-- **DHCP** for all VLANs is managed on OpenWRT with static reservations for critical devices (e.g., Proxmox servers, Raspberry Pis, etc.).
+- **DNS** is handled by UniFi (or Unbound) on the homelab VLAN.  
+- **DHCP** for all VLANs is managed on UniFi with static reservations for critical devices (e.g., Cluster nodes, Proxmox servers, Raspberry Pis, etc.).
 
 ---
 
