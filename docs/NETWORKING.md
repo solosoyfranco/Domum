@@ -45,27 +45,15 @@ This document describes the network layout, VLAN segments, and IP schema for the
 
 ---
 
-## 4. Proxmox Bridge Configuration
+## 4. Kubernetes Networking
 
-When deploying VMs or Talos nodes, each Proxmox host typically has a bridge interface (e.g., `vmbr0`) connected to the trunk port on the switch. VLAN tagging can be done at the Proxmox VM-level or on the switch:
-
-1. **Trunk Ports** on the switch:  
-   - `vmbr0` carries VLANs 10, 30, 40, 50, etc.  
-2. **Proxmox VM Settings**:  
-   - Each VM NIC might specify a VLAN tag if the VM expects to join a specific VLAN.
-
----
-
-## 5. Kubernetes Networking
-
+- **HA Controlplane**: Managed by VIP in `10.0.0.100`.
 - **Pod Network**: Handled via CNI (e.g., Calico or Cilium).  
-- **Service Network**: Typically a non-overlapping subnet (e.g., `10.96.0.0/12`).  
-- **LoadBalancer IP Range**: Managed by MetalLB or Kube-VIP in `10.0.0.101-10.0.0.199`.
-- - **HA Controlplane**: Managed by VIP in `10.0.0.100`.
+- **LoadBalancer**: Managed by Traefik in `10.0.0.101`.
 
 ---
 
-## 6. Security & Firewall Rules
+## 5. Security & Firewall Rules
 
 1. **Inter-VLAN Filtering**:  
    - Deny by default; allow only necessary ports/protocols between VLANs (e.g., SSH, HTTPS).  
@@ -74,13 +62,12 @@ When deploying VMs or Talos nodes, each Proxmox host typically has a bridge inte
 
 ---
 
-## 7. Future Plans
+## 6. Future Plans
 
-- **Expand VLAN segments** if new device classes or security requirements emerge.  
 - **Segment** DMZ or externally exposed services into separate VLAN if public-facing.  
 
 ---
 
-## 8. References & Diagrams
+## 7. Diagrams
 
-- (Optional) Include network topology diagrams here or in a separate file, showing switches, APs, VLAN trunks, etc.
+- In progress
