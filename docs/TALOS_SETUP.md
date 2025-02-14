@@ -2,6 +2,16 @@
 
 This document provides steps to configure a Talos Linux Kubernetes cluster with a Virtual IP (VIP) for High Availability.
 Remember to check the disk name and patch the controlplane + the disk name.
+
+ISO Generation and upgrades -> https://factory.talos.dev 
+	Visit Talos Factory and generate an ISO with:
+	
+	- System Extensions (Varies depending on your case):
+	- siderolabs/intel-ucode (only on my baremetal systems that have intel)
+	- siderolabs/iscsi-tools (Required for Longhorn)
+	- siderolabs/util-linux-tools (Required for Longhorn)
+	- siderolabs/qemu-guest-agent (only for proxmox vms)
+
 ---
 
 ## **1. Generate Configuration Files**
@@ -53,12 +63,16 @@ talosctl bootstrap -n 10.0.0.90
 
 ### **4. Set Endpoint for Talos**
 ```sh
-talosctl config endpoint 10.0.0.100
+talosctl config endpoint 10.0.0.100 10.0.0.90 10.0.0.91 10.0.0.92
+talosctl config node 10.0.0.90 10.0.0.91 10.0.0.92
 ```
 
 ### **5. Verify Cluster Status**
 ```sh
 kubectl get nodes
+talosctl config contexts
+talosctl dmesg -n 10.0.0.90
+
 ```
 
 ---

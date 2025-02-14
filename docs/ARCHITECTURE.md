@@ -1,31 +1,35 @@
 # Domum Homelab Architecture
 
-This document provides a high-level overview of the Domum homelab's architecture, including server roles, virtualization strategy, and core cluster design.
+This document provides a overview of the Domum homelab's architecture, including server roles, virtualization strategy, and core cluster design.
 
 ---
 
 ## 1. High-Level Diagram
 
-*(Optional) Insert or link to a diagram illustrating the homelab's physical and logical layout: Proxmox hosts, Raspberry Pis, network segments, and so on.*
+Diagram illustrating the homelab's physical and logical layout: Proxmox hosts, Raspberry Pis, network segments, and so on.*
 
 Example Diagram Outline:
 ```bash
-┌─────────────┐    ┌─────────────────┐
-│  OpenWRT    │    │   Unifi Switch  │
-│  (Router)   │───▶│   VLAN Trunk    │────▶ [Proxmox Node 1]
-└─────────────┘    └─────────────────┘      [Proxmox Node 2]
-▲                                           [RPi 1..6]
+Internet Gfiber
 │
 1 Gbps
 │
-Internet Gfiber
+▼
+┌─────────────┐    ┌─────────────────┐
+│  UniFi      │    │   Unifi Switch  │
+│  (Router)   │───▶│   VLAN Trunk    │────▶ [Proxmox Node 1]
+└─────────────┘    └─────────────────┘      [Talos BareMetal - Domum-X]
+                                            [RPi4 - Domum-Xr2]
 ``` 
 ---
 
 ## 2. Physical Components
 
-- **Proxmox Cluster (x3 Hosts)**  
-  - Each host has [CPU], [RAM], [Storage], and runs multiple VMs or LXCs.  
+- **Proxmox**  
+  - Lenovo Mq720
+- **Talos Baremetal**
+  - HP Prodesk mini G3 600
+  - Lenovo Mq720  
 - **Raspberry Pi (x6)**  
   - RPi 3/4/5 models for specialized workloads or edge services.
 
@@ -37,9 +41,9 @@ Internet Gfiber
 - **Talos Linux**: Running the Kubernetes control-plane on at least 3 VMs (or mixed with RPi).  
 - **LXC Containers**: Occasionally used for lightweight services not yet migrated to Kubernetes.  
 
-### Kubernetes Cluster
+### Kubernetes Cluster - in process of moving everything to baremetal
 - **Control Plane**: 3 nodes (some combination of Proxmox VMs and/or RPi).  
-- **Worker Nodes**: Additional VMs or physical Pis.  
+- **Worker Nodes**: Additional baremetal or physical Pi's.  
 - **Ingress**: Traefik or another ingress controller.  
 - **Networking**: MetalLB or Kube-VIP for load-balancing service IP addresses.  
 
@@ -61,8 +65,8 @@ Internet Gfiber
 ## 5. Storage Strategy
 
 - **Longhorn** or **Ceph** (planned/optional) for distributed block storage.  
-- **NFS or SMB** shares from a NAS (Unraid or FreeNAS) for bulk file storage.  
-- **Backups**: Offsite or local replication for all critical volumes (VM snapshots, etc.).
+- **NFS or SMB** shares from a NAS (Unraid) for bulk file storage.  
+- **Backups**: Google Cloud or local replication for all critical volumes (VM snapshots, etc.).
 
 ---
 
