@@ -319,3 +319,15 @@ watch -n 2 curl --resolve demo.localdev.me:31253:10.0.0.93 http://demo.localdev.
 
 ### **✅ Setup Complete!**
 Your Talos Kubernetes cluster with a Virtual IP should now be fully functional.
+
+
+## **Adding Metrics**
+Documentation: https://www.talos.dev/v1.9/kubernetes-guides/configuration/deploy-metrics-server/
+```bash
+kubectl apply -f https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/main/deploy/standalone-install.yaml
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+#then
+talosctl patch mc -p @cluster/core/01-talos/metrics-config.yaml -n 10.0.0.90,10.0.0.92,10.0.0.91,10.0.0.93,10.0.0.94
+#test
+kubectl top nodes
+``` 
