@@ -1,4 +1,5 @@
 kubectl create ns longhorn-system
+kubectl apply -f cluster/core/02-longhorn/namespace.yaml
 
 flux create source helm longhorn-repo \
   --url=https://charts.longhorn.io \
@@ -19,3 +20,6 @@ kubectl apply -f cluster/core/02-longhorn/helmrepo.yaml
 
 flux get helmrelease longhorn-release -n longhorn-system
  kubectl -n longhorn-system get pod
+
+ 
+ #verify that all workers have the extensions , and add the longhorn patch to the workers

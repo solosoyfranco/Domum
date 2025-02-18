@@ -16,11 +16,11 @@ ISO Generation and upgrades -> https://factory.talos.dev
 
 ## **1. Generate Configuration Files**
 ```sh
-talosctl gen config domum-cluster https://10.0.0.100:6443 \
+talosctl gen config domum-cluster https://10.0.1.100:6443 \
   --output cluster/private/talos \
   --with-docs=false \
   --with-examples=false \
-  --additional-sans 10.0.0.90,10.0.0.91,10.0.0.92 \
+  --additional-sans 10.0.1.90,10.0.1.91,10.0.1.92 \
   --config-patch @cluster/core/01-talos/vip-config.yaml
 ```
 
@@ -38,40 +38,40 @@ machine:
           physical: true  # Ensures it selects a physical network interface
         dhcp: true
         vip:
-          ip: 10.0.0.100
+          ip: 10.0.1.100
 
 cluster:
   controlPlane:
-    endpoint: https://10.0.0.100:6443
+    endpoint: https://10.0.1.100:6443
 ```
 
 ---
 
 ## **2. Apply Configuration to Control Plane Nodes**
 ```sh
-talosctl apply-config -n 10.0.0.90 -f cluster/private/talos/controlplane.yaml --insecure
-talosctl apply-config -n 10.0.0.91 -f cluster/private/talos/controlplane.yaml --insecure
-talosctl apply-config -n 10.0.0.92 -f cluster/private/talos/controlplane.yaml --insecure
+talosctl apply-config -n 10.0.1.90 -f cluster/private/talos/controlplane.yaml --insecure
+talosctl apply-config -n 10.0.1.91 -f cluster/private/talos/controlplane.yaml --insecure
+talosctl apply-config -n 10.0.1.92 -f cluster/private/talos/controlplane.yaml --insecure
 ##example of disk patch
-talosctl apply-config -n 10.0.0.92 -f cluster/private/talos/controlplane.yaml --config-patch @cluster/core/01-talos/rpi/disk-patch-rpi.yaml
+talosctl apply-config -n 10.0.1.92 -f cluster/private/talos/controlplane.yaml --config-patch @cluster/core/01-talos/rpi/disk-patch-rpi.yaml
 ```
 
 ### **3. Bootstrap the Cluster**
 ```sh
-talosctl bootstrap -n 10.0.0.90
+talosctl bootstrap -n 10.0.1.10
 ```
 
 ### **4. Set Endpoint for Talos**
 ```sh
-talosctl config endpoint 10.0.0.100 10.0.0.90 10.0.0.91 10.0.0.92
-talosctl config node 10.0.0.90 10.0.0.91 10.0.0.92
+talosctl config endpoint 10.0.1.100 10.0.1.10 10.0.1.11 10.0.1.12
+talosctl config node 10.0.1.10 10.0.1.11 10.0.1.12
 ```
 
 ### **5. Verify Cluster Status**
 ```sh
 kubectl get nodes
 talosctl config contexts
-talosctl dmesg -n 10.0.0.90
+talosctl dmesg -n 10.0.1.90
 
 ```
 
@@ -81,12 +81,12 @@ talosctl dmesg -n 10.0.0.90
 🚨 **Important:** Do not use `--insecure` for patching or applying configs.
 
 ```sh
-talosctl patch mc -p @cluster/core/01-talos/vip-patch-1.yaml -n 10.0.0.92
+talosctl patch mc -p @cluster/core/01-talos/vip-patch-1.yaml -n 10.0.1.12
 ```
 
 ### **Check VIP Address**
 ```sh
-talosctl get addresses --nodes 10.0.0.92  
+talosctl get addresses --nodes 10.0.1.12  
 ```
 
 ---
@@ -98,21 +98,21 @@ kubectl taint nodes domum-xr2 node-role.kubernetes.io/control-plane-
 ```
 Then reboot the node:
 ```sh
-talosctl reboot --nodes 10.0.0.91   
+talosctl reboot --nodes 10.0.1.11   
 ```
 
 ---
 
 ## **8. Reset & Start Fresh**
 ```sh
-talosctl reset --nodes 10.0.0.90 --graceful=false
+talosctl reset --nodes 10.0.1.10 --graceful=false
 ```
 
 ---
 
 ## **9. Retrieve Kubeconfig via VIP**
 ```sh
-talosctl kubeconfig -n 10.0.0.100  # Using VIP
+talosctl kubeconfig -n 10.0.1.100  # Using VIP
 export KUBECONFIG=cluster/private/talos/kubeconfig
 ```
 
@@ -121,7 +121,7 @@ export KUBECONFIG=cluster/private/talos/kubeconfig
 ## **10. Verify High Availability (HA)**
 ```sh
 kubectl get nodes -o wide
-talosctl dashboard --nodes 10.0.0.100
+talosctl dashboard --nodes 10.0.1.100
 ```
 
 ---
@@ -140,10 +140,10 @@ machine:
         crt: ...
         key: ...
     certSANs:
-        - 10.0.0.90
-        - 10.0.0.91
-        - 10.0.0.92
-        - 10.0.0.100
+        - 10.0.1.10
+        - 10.0.1.11
+        - 10.0.1.12
+        - 10.0.1.100
     kubelet:
         image: ghcr.io/siderolabs/kubelet:v1.32.1
         defaultRuntimeSeccompProfileEnabled: true
@@ -154,7 +154,7 @@ machine:
                 physical: true
               dhcp: true
               vip:
-                ip: 10.0.0.100
+                ip: 10.0.1.100
     install:
         disk: /dev/sda
         image: ghcr.io/siderolabs/installer:v1.9.3
@@ -176,7 +176,7 @@ cluster:
     id: ...
     secret: ...
     controlPlane:
-        endpoint: https://10.0.0.100:6443
+        endpoint: https://10.0.1.100:6443
     clusterName: domum-cluster
     network:
         dnsDomain: cluster.local
@@ -197,10 +197,10 @@ cluster:
     apiServer:
         image: registry.k8s.io/kube-apiserver:v1.32.1
         certSANs:
-            - 10.0.0.100
-            - 10.0.0.90
-            - 10.0.0.91
-            - 10.0.0.92
+            - 10.0.1.100
+            - 10.0.1.90
+            - 10.0.1.91
+            - 10.0.1.92
         disablePodSecurityPolicy: true
         admissionControl:
             - name: PodSecurity
@@ -256,10 +256,10 @@ machine:
         crt: ...
         key: ""
     certSANs:
-        - 10.0.0.90
-        - 10.0.0.91
-        - 10.0.0.92
-        - 10.0.0.100
+        - 10.0.1.90
+        - 10.0.1.91
+        - 10.0.1.92
+        - 10.0.1.100
     kubelet:
         image: ghcr.io/siderolabs/kubelet:v1.32.1
         defaultRuntimeSeccompProfileEnabled: true
@@ -271,7 +271,7 @@ machine:
               dhcp: true
     install:
         disk: /dev/sda
-        image: ghcr.io/siderolabs/installer:v1.9.3
+        image: ghcr.io/siderolabs/installer:v1.9.4
         wipe: false
     features:
         rbac: true
@@ -288,7 +288,7 @@ cluster:
     id: ...
     secret: ...
     controlPlane:
-        endpoint: https://10.0.0.100:6443
+        endpoint: https://10.0.1.100:6443
     clusterName: domum-cluster
     network:
         dnsDomain: cluster.local
@@ -327,7 +327,7 @@ Documentation: https://www.talos.dev/v1.9/kubernetes-guides/configuration/deploy
 kubectl apply -f https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/main/deploy/standalone-install.yaml
 kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 #then
-talosctl patch mc -p @cluster/core/01-talos/metrics-config.yaml -n 10.0.0.90,10.0.0.92,10.0.0.91,10.0.0.93,10.0.0.94
+talosctl patch mc -p @cluster/core/01-talos/metrics-config.yaml -n 10.0.1.10,10.0.1.11,10.0.1.12,10.0.1.13,10.0.1.14
 #test
 kubectl top nodes
 ``` 
