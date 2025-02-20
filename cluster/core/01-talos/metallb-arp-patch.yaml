@@ -1,0 +1,5 @@
+cluster:
+  network:
+    kubeProxy:
+      extraArgs:
+        strict-arp: "true"
