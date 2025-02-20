@@ -1,5 +1,3 @@
-cluster:
-  network:
-    kubeProxy:
-      extraArgs:
-        strict-arp: "true"
+- op: add
+  path: /cluster/network/kubeProxy/extraArgs/strict-arp
+  value: "true"
