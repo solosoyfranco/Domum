@@ -71,7 +71,7 @@ talosctl config node 10.0.1.10 10.0.1.11 10.0.1.12
 ```sh
 kubectl get nodes
 talosctl config contexts
-talosctl dmesg -n 10.0.1.90
+talosctl dmesg -n 10.0.1.10
 
 ```
 
@@ -312,17 +312,27 @@ cluster:
 
 ## **12. Watch and Test Services**
 ```sh
-watch -n 2 curl --resolve demo.localdev.me:31253:10.0.0.93 http://demo.localdev.me:31253
+watch -n 2 curl --resolve demo.localdev.me:31253:10.0.1.10 http://demo.localdev.me:31253
 ```
+## **13. Change name of Nodes**
+```bash
+talosctl patch mc --nodes 10.0.1.10 -p '{"machine":{"network":{"hostname":"domum-x"}}}'
+#Restart nodes for changes to take effect:
+talosctl reboot --nodes 10.0.1.10,10.0.1.11,10.0.1.12
+#Cordon & Drain the Node (if needed)
+kubectl cordon talos-7ks-bsd
+kubectl drain talos-7ks-bsd --ignore-daemonsets --delete-emptydir-data
+#Manually Remove the Old Node (Talos will re-register it)
+kubectl delete node talos-7ks-bsd
+``` 
 
 ---
 
-### **✅ Setup Complete!**
-Your Talos Kubernetes cluster with a Virtual IP should now be fully functional.
 
 
 ## **Adding Metrics**
 Documentation: https://www.talos.dev/v1.9/kubernetes-guides/configuration/deploy-metrics-server/
+
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/main/deploy/standalone-install.yaml
 kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
