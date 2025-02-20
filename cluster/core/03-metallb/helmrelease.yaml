@@ -4,7 +4,7 @@ metadata:
   name: metallb
   namespace: metallb-system
 spec:
-  interval: 5m  
+  interval: 5m
   chart:
     spec:
       chart: metallb
@@ -14,12 +14,6 @@ spec:
         name: metallb
         namespace: flux-system
   values:
-    configInline:
-      address-pools:
-      - name: default
-        protocol: layer2
-        addresses:
-        - 10.0.1.200-10.0.1.250
     speaker:
       tolerations:
       - key: node-role.kubernetes.io/control-plane
