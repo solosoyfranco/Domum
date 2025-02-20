@@ -1,11 +1,10 @@
-#cluster/core/03-metallb/helmrelease.yaml
-
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: metallb
   namespace: metallb-system
 spec:
+  interval: 5m  
   chart:
     spec:
       chart: metallb
@@ -20,7 +19,7 @@ spec:
       - name: default
         protocol: layer2
         addresses:
-        - 10.0.0.200-10.0.0.250  # Adjust to your network range
+        - 10.0.1.200-10.0.1.250
     speaker:
       tolerations:
       - key: node-role.kubernetes.io/control-plane
