@@ -1,3 +1,4 @@
+#cluster/core/05-cert-manager/issuer/letsencrypt-staging.yaml
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
