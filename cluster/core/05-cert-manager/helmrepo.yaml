@@ -1,0 +1,10 @@
+#cluster/core/05-cert-manager/helmrepo.yaml
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: cert-manager-repo
+  namespace: cert-manager
+spec:
+  interval: 1m0s
+  url: https://charts.jetstack.io
