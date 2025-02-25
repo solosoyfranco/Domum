@@ -1,0 +1,19 @@
+# cluster/core/02-longhorn/middleware.yaml
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: longhorn-security
+  namespace: longhorn-system
+spec:
+  headers:
+    stsIncludeSubdomains: true
+    stsPreload: true
+    stsSeconds: 15552000
+    contentTypeNosniff: true
+    browserXssFilter: true
+    customFrameOptionsValue: SAMEORIGIN
+    forceSTSHeader: true
+    referrerPolicy: no-referrer
+    customRequestHeaders:
+      X-Forwarded-Proto: https
