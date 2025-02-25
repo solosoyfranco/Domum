@@ -1,0 +1,18 @@
+# cluster/apps/services/homepage/configmap.yaml
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage-values
+  namespace: default
+data:
+  values.yaml: |
+    service:
+      type: LoadBalancer
+      loadBalancerIP: 10.0.1.201
+    persistence:
+      enabled: true
+      existingClaim: homepage-config
+    securityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
