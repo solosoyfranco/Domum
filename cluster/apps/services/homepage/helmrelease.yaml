@@ -1,0 +1,19 @@
+# cluster/apps/services/homepage/helmrelease.yaml
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: homepage-release
+  namespace: default
+spec:
+  chart:
+    spec:
+      chart: homepage
+      sourceRef:
+        kind: HelmRepository
+        name: homepage-repo
+      version: "0.10.9"  # Use the latest version available ** https://github.com/gethomepage/homepage/releases **
+  interval: 1m0s
+  valuesFrom:
+    - kind: ConfigMap
+      name: homepage-values
