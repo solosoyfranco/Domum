@@ -3,16 +3,65 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: homepage-values
+  name: homepage
   namespace: default
+  labels:
+    app.kubernetes.io/name: homepage
 data:
-  values.yaml: |
-    service:
-      type: LoadBalancer
-      loadBalancerIP: 10.0.1.201
-    persistence:
-      enabled: true
-      existingClaim: homepage-config
-    securityContext:
-      runAsUser: 1000
-      runAsGroup: 1000
+  kubernetes.yaml: |
+    mode: cluster
+  settings.yaml: ""
+  #settings.yaml: |
+  #  providers:
+  #    longhorn:
+  #      url: https://longhorn.my.network
+  custom.css: ""
+  custom.js: ""
+  bookmarks.yaml: |
+    - Developer:
+        - Github:
+            - abbr: GH
+              href: https://github.com/solosoyfranco
+  services.yaml: |
+    - My First Group:
+        - My First Service:
+            href: http://localhost/
+            description: Homepage is awesome
+
+    - My Second Group:
+        - My Second Service:
+            href: http://localhost/
+            description: Homepage is the best
+
+    - My Third Group:
+        - My Third Service:
+            href: http://localhost/
+            description: Homepage is 😎
+    
+    - My Fourth Group:
+        - My Fourth Service:
+            href: http://localhost/
+            description: Homepage is the best
+  widgets.yaml: |
+    - kubernetes:
+        cluster:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+          label: "cluster"
+        nodes:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+    - resources:
+        backend: resources
+        expanded: true
+        cpu: true
+        memory: true
+        network: default
+    - search:
+        provider: duckduckgo
+        target: _blank
+  docker.yaml: ""

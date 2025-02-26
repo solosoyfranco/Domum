@@ -6,53 +6,22 @@
 - FluxCD installed and managing your cluster
 - Helm and `kubectl` installed and configured
 
-
-## **Add Helm Repository**
-```sh
-kubectl apply -f cluster/apps/services/homepage/helmrepo.yaml
-```
-
-```yaml
-# cluster/apps/services/homepage/helmrepo.yaml
 ---
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: HelmRepository
-metadata:
-  name: homepage-repo
-  namespace: default
-spec:
-  interval: 1m0s
-  url: https://gethomepage.github.io/homepage
-```
 
-## **Deploy Homepage with HelmRelease**
+## **1. Add Helm Repository and Install Homepage**
+First, add the Helm repository and install Homepage using Helm:
+
 ```sh
-kubectl apply -f cluster/apps/services/homepage/helmrelease.yaml
+helm repo add jameswynn https://jameswynn.github.io/helm-charts
+helm repo update
+helm install homepage jameswynn/homepage -f values.yaml
 ```
 
-```yaml
-# cluster/apps/services/homepage/helmrelease.yaml
 ---
-apiVersion: helm.toolkit.fluxcd.io/v2
-kind: HelmRelease
-metadata:
-  name: homepage-release
-  namespace: default
-spec:
-  chart:
-    spec:
-      chart: homepage
-      sourceRef:
-        kind: HelmRepository
-        name: homepage-repo
-      version: "1.0.0"  # Use the latest version available
-  interval: 1m0s
-  valuesFrom:
-    - kind: ConfigMap
-      name: homepage-values
-```
 
-## **Configure Homepage Settings**
+## **2. Apply Configuration (values.yaml via ConfigMap)**
+Create a ConfigMap to store the Helm values.
+
 ```sh
 kubectl apply -f cluster/apps/services/homepage/configmap.yaml
 ```
@@ -65,6 +34,11 @@ kind: ConfigMap
 metadata:
   name: homepage-values
   namespace: default
+  labels:
+    app.kubernetes.io/name: homepage
+    app.kubernetes.io/instance: homepage
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/version: "latest"
 data:
   values.yaml: |
     service:
@@ -76,9 +50,23 @@ data:
     securityContext:
       runAsUser: 1000
       runAsGroup: 1000
+    ingress:
+      main:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: traefik-external
+        hosts:
+          - host: home.lan.digitalcactus.cc
+            paths:
+              - path: /
+                pathType: Prefix
 ```
 
-## **Create Persistent Volume Claim (Optional, if storing configurations persistently)**
+---
+
+## **3. Create Persistent Volume Claim (Optional)**
+This step ensures persistent storage for Homepage configurations.
+
 ```sh
 kubectl apply -f cluster/apps/services/homepage/pvc.yaml
 ```
@@ -99,7 +87,11 @@ spec:
       storage: 1Gi
 ```
 
-## **Apply IngressRoute for External Access**
+---
+
+## **4. Apply IngressRoute for External Access**
+Expose Homepage using Traefik.
+
 ```sh
 kubectl apply -f cluster/apps/services/homepage/ingress.yaml
 ```
@@ -118,16 +110,49 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`homepage.lan.digitalcactus.cc`) && PathPrefix(`/`)
+    - match: Host(`home.lan.digitalcactus.cc`) && PathPrefix(`/`)
       kind: Rule
       services:
-        - name: homepage-release
-          port: 80
+        - name: homepage
+          port: 3000
   tls:
     secretName: lan-digitalcactus-cc-tls
 ```
 
-## **Verify Deployment**
+---
+
+## **5. Deploy Homepage with Flux HelmRelease**
+Deploy Homepage as a Flux-managed HelmRelease.
+
+```sh
+kubectl apply -f cluster/apps/services/homepage/helmrelease.yaml
+```
+
+```yaml
+# cluster/apps/services/homepage/helmrelease.yaml
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: homepage-release
+  namespace: default
+spec:
+  chart:
+    spec:
+      chart: homepage
+      sourceRef:
+        kind: HelmRepository
+        name: homepage-repo
+      version: "latest"
+  interval: 1m0s
+  valuesFrom:
+    - kind: ConfigMap
+      name: homepage-values
+```
+
+---
+
+## **6. Verify Deployment**
 ### **Check Pods**
 ```sh
 kubectl get pods -n default
@@ -145,10 +170,10 @@ kubectl get ingressroute -n default
 
 ### **Test Access**
 ```sh
-curl -k https://homepage.lan.digitalcactus.cc
+curl -k https://home.lan.digitalcactus.cc
 ```
 Expected Output:
-```
+```html
 <!DOCTYPE html>
 <html>
   <head>
@@ -160,7 +185,9 @@ Expected Output:
 </html>
 ```
 
-## **8. Troubleshooting**
+---
+
+## **7. Troubleshooting**
 ### **Check HelmRelease Status**
 ```sh
 kubectl get helmrelease homepage-release -n default
@@ -176,3 +203,4 @@ kubectl logs -l app.kubernetes.io/name=homepage -n default --tail=100 -f
 kubectl rollout restart deployment -n default
 ```
 
+helm upgrade --install homepage jameswynn/homepage -f cluster/apps/services/homepage/values.yaml
