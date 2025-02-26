@@ -1,0 +1,16 @@
+# cluster/apps/services/homepage/service.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: homepage
+  namespace: default
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: homepage
+  ports:
+    - name: http
+      protocol: TCP
+      port: 3000  
+      targetPort: 3000  
