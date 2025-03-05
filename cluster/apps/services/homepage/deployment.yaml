@@ -25,7 +25,8 @@ spec:
       dnsPolicy: ClusterFirst
       enableServiceLinks: true
       securityContext:
-        fsGroup: 1000  # Ensure mounted files have correct permissions
+        runAsNonRoot: true
+        fsGroup: 1000
       containers:
         - name: homepage
           image: "ghcr.io/gethomepage/homepage:latest"
@@ -38,7 +39,8 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
-            runAsUser: 1000  # ✅ Fix: Force running as a non-root user
+            runAsUser: 1000
+            runAsNonRoot: true
             seccompProfile:
               type: RuntimeDefault
           volumeMounts:
@@ -74,3 +76,4 @@ spec:
             name: homepage
         - name: logs
           emptyDir: {}
+

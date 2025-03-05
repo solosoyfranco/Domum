@@ -8,40 +8,156 @@ metadata:
   labels:
     app.kubernetes.io/name: homepage
 data:
+  ## Kubernetes settings
   kubernetes.yaml: |
     mode: cluster
-  settings.yaml: ""
-  #settings.yaml: |
-  #  providers:
-  #    longhorn:
-  #      url: https://longhorn.my.network
+
+  ## General Homepage settings
+  settings.yaml: |
+    title: "Domum Dashboard"
+    theme: dark
+    color: slate
+    useEqualHeights: true
+
+  ## Custom Styling & Scripts
   custom.css: ""
   custom.js: ""
+
+  ## 🔹 Bookmarks
   bookmarks.yaml: |
-    - Developer:
-        - Github:
+    - Development:
+        - Github Solosoyfranco:
             - abbr: GH
-              href: https://github.com/solosoyfranco
+              href: "https://github.com/solosoyfranco"
+              description: Solosoyfranco's Github
+        - Github Domum:
+            - abbr: GH
+              href: "https://github.com/solosoyfranco/Domum"
+              description: Domum's Github
+        - Cloudflare Dashboard:
+            - abbr: CF
+              href: "https://dash.cloudflare.com/"
+              description: Cloudflare Dashboard
+        - Tailscale:
+            - abbr: TS
+              href: "https://login.tailscale.com/"
+              description: Tailscale
+    - Social:
+        - LinkedIn:
+            - abbr: LI
+              href: "https://www.linkedin.com/in/jfranco-lopez"
+              description: "My LinkedIn"
+        - Reddit:
+            - abbr: R
+              href: "https://www.reddit.com/"
+              description: "Reddit"
+        - Twitter (X):
+            - abbr: X
+              href: "https://twitter.com/"
+              description: "Twitter (X)"
+    - Entertainment:
+      - YouTube:
+          - abbr: YT
+            href: "https://www.youtube.com/"
+            description: "YouTube"
+      - Netflix:
+          - abbr: NF
+            href: "https://www.netflix.com/"
+            description: "Netflix"
+      - Plex:
+          - abbr: P
+            href: "https://app.plex.tv/desktop"
+            description: "Plex Media Server"
+
+  ## 🔹 Services
   services.yaml: |
-    - My First Group:
-        - My First Service:
-            href: http://localhost/
-            description: Homepage is awesome
+    - Infrastructure:
+        - Gateway:
+            icon: mdi-web
+            href: https://10.0.0.1
+            description: Domum Gateway
+            ping: 10.0.0.1
+        - Proxmox VE:
+            icon: proxmox.svg
+            href: https://10.0.0.11:8006/
+            description: Domum Proxmox Hypervisor
+            ping: 10.0.0.11
+        - Unifi Controller:
+            icon: unifi.svg
+            href: https://10.0.0.4:8443/
+            description: Unifi Network Controller
+            ping: 10.0.0.4
+        - AdGuard Home:
+            icon: mdi-dns-outline
+            href: http://10.0.0.3/#dns_rewrites
+            description: AdGuard Home - DNS Filtering
+            ping: 10.0.0.3
+        - Home Assistant:
+            icon: home-assistant.svg
+            href: http://10.0.0.5:8123/lovelace/0
+            description: Smart Home Control
+            ping: 10.0.0.5
+        - Traefik Dashboard:
+            icon: traefik.svg
+            href: https://traefik.lan.digitalcactus.cc/dashboard/#/
+            description: Traefik Reverse Proxy
+            ping: 10.0.1.200
+        - Longhorn Storage:
+            icon: longhorn.svg
+            href: https://longhorn.lan.digitalcactus.cc/
+            description: Kubernetes Longhorn Storage
+            ping: longhorn.lan.digitalcactus.cc
+        
 
-    - My Second Group:
-        - My Second Service:
+    - Media:
+        - Plex:
+            icon: plex.svg
             href: http://localhost/
-            description: Homepage is the best
+            description: Plex Media Server
+        - Jellyfin:
+            icon: jellyfin.svg
+            href: http://localhost/
+            description: Jellyfin Media Streaming
+        - Sonarr:
+            icon: sonarr.svg
+            href: http://localhost/
+            description: Sonarr - TV Show Management
+        - Radarr:
+            icon: radarr.svg
+            href: http://localhost/
+            description: Radarr - Movie Management
+        - Lidarr:
+            icon: lidarr.svg
+            href: http://localhost/
+            description: Lidarr - Music Management
 
-    - My Third Group:
-        - My Third Service:
+    - File Management:
+        - Unraid WebUI:
+            icon: unraid.svg
+            href: https://unraid.lan.digitalcactus.cc
+            description: Unraid Storage Server
+        - Nextcloud:
+            icon: nextcloud.svg
             href: http://localhost/
-            description: Homepage is 😎
-    
-    - My Fourth Group:
-        - My Fourth Service:
+            description: Personal Cloud Storage
+        - Syncthing:
+            icon: syncthing.svg
             href: http://localhost/
-            description: Homepage is the best
+            description: Syncthing - File Synchronization
+        - Resilio Sync:
+            icon: mdi-resistor-nodes
+            href: http://localhost/
+            description: Resilio Sync - Peer-to-Peer File Sharing
+        - Samba:
+            icon: mdi-folder-home
+            href: http://localhost/
+            description: Samba File Sharing
+        - qBittorrent:
+            icon: qbittorrent.svg
+            href: http://localhost/
+            description: qBittorrent WebUI
+
+  ## 🔹 Widgets
   widgets.yaml: |
     - kubernetes:
         cluster:
@@ -49,19 +165,55 @@ data:
           cpu: true
           memory: true
           showLabel: true
-          label: "cluster"
+          label: "K8s Domum Cluster"
         nodes:
           show: true
           cpu: true
           memory: true
           showLabel: true
     - resources:
-        backend: resources
+        backend: kubernetes
         expanded: true
         cpu: true
         memory: true
-        network: default
+        network: true
     - search:
-        provider: duckduckgo
+        provider: google
+        focus: true 
+        showSearchSuggestions: true
         target: _blank
-  docker.yaml: ""
+    - datetime:
+        format:
+            dateStyle: short
+            timeStyle: short
+            hour12: true
+    - greeting:
+        text_size: xl
+        text: Domum Dash
+    - openmeteo:
+        label: Durham 
+        latitude: 35.994
+        longitude: -78.8986
+        timezone: America/New_York
+        units: imperial
+        cache: 5 # Time in minutes to cache API responses, to stay within limits
+        format: # optional, Intl.NumberFormat options
+          maximumFractionDigits: 1
+
+
+  ## 🔹 Docker Configuration (Optional)
+  docker.yaml: |
+    socket: "/var/run/docker.sock"
+    volumes:
+      - name: docker-socket
+        hostPath:
+          path: /var/run/docker.sock  
+          type: Socket
+### to add
+#https://gethomepage.dev/widgets/info/resources/
+#https://gethomepage.dev/widgets/info/unifi_controller/ password and username
+#https://gethomepage.dev/widgets/info/longhorn/ password and username
+#https://gethomepage.dev/configs/settings/#headers
+#https://gethomepage.dev/configs/settings/#layout
+#notes https://gethomepage.dev/configs/services/#icons
+#implement https://gethomepage.dev/widgets/services/glances/
