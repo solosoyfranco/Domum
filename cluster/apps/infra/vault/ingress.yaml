@@ -1,0 +1,21 @@
+# cluster/apps/infra/vault/ingress.yaml
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: vault
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`vault.lan.digitalcactus.cc`)
+      kind: Rule
+      services:
+        - name: vault # whatever "kubectl get svc" shows
+          port: 8200
+      middlewares:
+        - name: default-headers
+  tls:
+    secretName: lan-digitalcactus-cc-tls

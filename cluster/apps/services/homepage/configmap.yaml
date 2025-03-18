@@ -101,12 +101,10 @@ data:
             icon: traefik.svg
             href: https://traefik.lan.digitalcactus.cc/dashboard/#/
             description: Traefik Reverse Proxy
-            ping: 10.0.1.200
         - Longhorn Storage:
             icon: longhorn.svg
             href: https://longhorn.lan.digitalcactus.cc/
             description: Kubernetes Longhorn Storage
-            ping: longhorn.lan.digitalcactus.cc
         
 
     - Media:
@@ -166,6 +164,7 @@ data:
           memory: true
           showLabel: true
           label: "K8s Domum Cluster"
+          apiVersion: metrics.k8s.io/v1beta1  
         nodes:
           show: true
           cpu: true
@@ -203,12 +202,8 @@ data:
 
   ## 🔹 Docker Configuration (Optional)
   docker.yaml: |
-    socket: "/var/run/docker.sock"
-    volumes:
-      - name: docker-socket
-        hostPath:
-          path: /var/run/docker.sock  
-          type: Socket
+    socket: ""
+    enabled: false
 ### to add
 #https://gethomepage.dev/widgets/info/resources/
 #https://gethomepage.dev/widgets/info/unifi_controller/ password and username

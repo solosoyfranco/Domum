@@ -31,6 +31,9 @@ spec:
         - name: homepage
           image: "ghcr.io/gethomepage/homepage:latest"
           imagePullPolicy: Always
+          env:
+            - name: HOMEPAGE_ALLOWED_HOSTS
+              value: "home.lan.digitalcactus.cc"
           ports:
             - name: http
               containerPort: 3000
@@ -43,7 +46,7 @@ spec:
             runAsNonRoot: true
             seccompProfile:
               type: RuntimeDefault
-          volumeMounts:
+          volumeMounts:        
             - mountPath: /app/config/custom.js
               name: homepage-config
               subPath: custom.js
@@ -76,4 +79,5 @@ spec:
             name: homepage
         - name: logs
           emptyDir: {}
+---
 

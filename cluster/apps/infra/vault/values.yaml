@@ -1,0 +1,96 @@
+global:
+  enabled: true
+  tlsDisable: false
+
+injector:
+  extraLabels: {}
+  hostNetwork: false
+  service:
+    annotations: {}
+  serviceAccount:
+    annotations: {}
+  podDisruptionBudget:
+    maxUnavailable: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+
+server:
+  enabled: true
+  image:
+    repository: hashicorp/vault
+    tag: "1.18.1"
+    pullPolicy: IfNotPresent
+  logLevel: info
+  logFormat: standard
+  
+  # We disable the built-in Ingress since you're using
+  # a separate Traefik IngressRoute YAML file.
+  ingress:
+    enabled: false
+
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 500m
+    limits:
+      memory: 1Gi
+      cpu: 1000m
+
+  service:
+    type: ClusterIP
+    port: 8200
+    annotations: {}
+    clusterIP: ""
+
+  dataStorage:
+    enabled: true
+    size: 5Gi
+    storageClass: "longhorn"
+    accessMode: ReadWriteOnce
+
+  ha:
+    enabled: true
+    replicas: 3
+    raft:
+      enabled: true
+      setNodeId: true
+      config: |
+        ui = true
+
+        # The listener is plain HTTP so we rely on Traefik for TLS termination.
+        listener "tcp" {
+          address         = "[::]:8200"
+          cluster_address = "[::]:8201"
+          tls_disable     = 1
+        }
+
+        api_addr = "https://vault.lan.digitalcactus.cc"
+
+        storage "raft" {
+          path = "/vault/data"
+        }
+
+        service_registration "kubernetes" {}
+
+  securityContext:
+    pod:
+      runAsNonRoot: true
+      runAsUser: 100
+      runAsGroup: 1000
+      fsGroup: 1000
+    container:
+      allowPrivilegeEscalation: false
+
+  serviceAccount:
+    create: true
+    serviceDiscovery:
+      enabled: true
+
+ui:
+  enabled: true
+  serviceType: ClusterIP
+  publishNotReadyAddresses: true
+  externalTrafficPolicy: Cluster
